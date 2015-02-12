@@ -3,16 +3,16 @@ package edu.cs4730.notificationdemo2;
 
 import java.util.Calendar;
 import android.os.Bundle;
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 
-public class MainActivity extends Activity {
+public class MainActivity extends ActionBarActivity {
 	int NotID = 1;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
