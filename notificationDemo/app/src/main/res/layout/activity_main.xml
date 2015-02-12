@@ -94,4 +94,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="With alarm in 2 minutes" />
+    <Button
+        android:id="@+id/noti_and5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="lollipop notification" />
 </LinearLayout>

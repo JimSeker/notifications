@@ -116,7 +116,7 @@ public class MainActivity extends ActionBarActivity {
                     nm.cancel(NotID);
                     NotID--;
                 }
-                //Remeber use notify with the same ID number, it will just update notification
+                //Remember use notify with the same ID number, it will just update notification
                 //assuming the user hasn't removed it already.
             }
         });
@@ -125,6 +125,14 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View view) {
                 notlater();
+            }
+        });
+
+        findViewById(R.id.noti_and5).setOnClickListener(new OnClickListener() {
+            //create a android 5/lollipop notification popup.
+            @Override
+            public void onClick(View view) {
+                and5_notificaiton();
             }
         });
     }
@@ -394,6 +402,29 @@ public class MainActivity extends ActionBarActivity {
 
         //---sets the alarm to trigger---
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), contentIntent);
+        NotID++;
+    }
+    //creates a notification for lollipop with a popup/heads up message..
+    public void and5_notificaiton(){
+        Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
+        notificationIntent.putExtra("mytype", "iconmsg" + NotID);
+        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, 0);
+         Notification noti = new NotificationCompat.Builder(getApplicationContext())
+                //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
+                .setContentTitle("Lollipop notificaiton")   //Title message top row.
+                .setContentText("This should be an annoying heads up message.")  //message when looking at the notification, second row
+                //the folowing 2 lines cause it to show up as popup message at the top in android 5 systems.
+                .setPriority(Notification.PRIORITY_MAX)  //could also be PRIORITY_HIGH.
+                .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000})  //for the heads/pop up must have sound or vibrate
+                .setVisibility(Notification.VISIBILITY_PUBLIC)  //VISIBILITY_PRIVATE or VISIBILITY_SECRET
+                .setContentIntent(contentIntent)  //what activity to open.
+                .setAutoCancel(true)   //allow auto cancel when pressed.
+                .build();  //finally build and return a Notification.
+
+        //Show the notification
+        nm.notify(NotID, noti);
         NotID++;
     }
     @Override
