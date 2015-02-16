@@ -247,7 +247,7 @@ public class MainActivity extends ActionBarActivity {
         //default one
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.setAction("Click");
-        notificationIntent.putExtra("mytype", "fuck Notification");
+        notificationIntent.putExtra("mytype", "No cursing Notification");
         PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, 0);
         //first button
         Intent notificationIntent1 = new Intent(getApplicationContext(), receiveActivity.class);
