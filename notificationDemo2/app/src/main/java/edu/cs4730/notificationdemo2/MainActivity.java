@@ -6,13 +6,14 @@ import android.os.Bundle;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Toast;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
 	int NotID = 1;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +51,8 @@ public class MainActivity extends ActionBarActivity {
 
 
 				PendingIntent contentIntent = PendingIntent.getBroadcast(MainActivity.this, NotID, intent, 0);
-		        Log.i("MainACtivity", "Set alarm, I hope");
-		             
+		        Log.i("MainActivity", "Set alarm, I hope");
+                Toast.makeText(getApplicationContext(),"Alarm for " + calendar.get(Calendar.MINUTE) , Toast.LENGTH_SHORT).show();
 
 		        //---sets the alarm to trigger---
 		        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), contentIntent);

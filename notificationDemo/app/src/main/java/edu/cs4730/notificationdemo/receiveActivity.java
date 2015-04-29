@@ -1,7 +1,7 @@
 package edu.cs4730.notificationdemo;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 /*
@@ -17,7 +17,7 @@ import android.widget.TextView;
  * http://developer.android.com/reference/android/app/Notification.html
  */
 
-public class receiveActivity extends FragmentActivity {
+public class receiveActivity extends AppCompatActivity {
 	TextView Logger;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

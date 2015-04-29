@@ -7,7 +7,6 @@ package edu.cs4730.notificationdemo;
  * http://mobiforge.com/developing/story/displaying-status-bar-notifications-android
  */
 
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -15,8 +14,9 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.support.v7.app.AppCompatActivity;
 
-public class DisplayNotification extends Activity {
+public class DisplayNotification extends AppCompatActivity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {

@@ -6,12 +6,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NotificationCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 
-public class BroadCastRDemo extends FragmentActivity {
+public class BroadCastRDemo extends AppCompatActivity {
   //"edu.cs4730.notificationdemo.broadNotification"
 	
 	NotificationManager nm;
