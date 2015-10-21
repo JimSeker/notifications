@@ -28,13 +28,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        //Icon only button
-        findViewById(R.id.btn_old).setOnClickListener(new OnClickListener() {
+        //Icon only button  oldway doesn't work on new systems at all.  removed in api 23!
+        /*findViewById(R.id.btn_old).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 oldway();
             }
-        });
+        }); */
+
         //call a new activity so we can play with a broadcast receiver.
         findViewById(R.id.btn_mbc).setOnClickListener(new OnClickListener() {
             @Override
@@ -172,7 +173,10 @@ public class MainActivity extends AppCompatActivity {
         //Set the notification details
         //Second parameter: the title of the content
         //Third parameter: the content message of the content
-        noti.setLatestEventInfo(getApplicationContext(), "Message Title", "Message Content", contentIntent);
+
+
+        //not just depricated, but removed at this point.
+        //noti.setLatestEventInfo(getApplicationContext(), "Message Title", "Message Content", contentIntent);
 
         //Set the notification to remove itself after selected
         noti.flags = Notification.FLAG_AUTO_CANCEL;
