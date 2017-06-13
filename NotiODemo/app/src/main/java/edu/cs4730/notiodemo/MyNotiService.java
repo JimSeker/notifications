@@ -12,7 +12,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -35,6 +34,7 @@ public class MyNotiService extends Service {
     Random r;
     int NotID =1;
     NotificationManager nm;
+
     // Handler that receives messages from the thread
     private final class ServiceHandler extends Handler {
         public ServiceHandler(Looper looper) {
@@ -74,7 +74,7 @@ public class MyNotiService extends Service {
                     }
                 } else {
                     //no handler, so use notification
-                    makenoti(info);
+                    makenoti(info, i+1);
                 }
             }
             // Stop the service using the startId, so that we don't stop
@@ -116,15 +116,17 @@ public class MyNotiService extends Service {
     public void onDestroy() {
         Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
     }
-    public void makenoti(String message) {
+    public void makenoti(String message, int msgcount) {
 
-        Notification noti = new NotificationCompat.Builder(getApplicationContext())
-                .setSmallIcon(R.mipmap.ic_launcher_round)
-                .setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
-
+        //Notification noti = new NotificationCompat.Builder(getApplicationContext())
+        Notification noti = new Notification.Builder(getApplicationContext())
+                .setSmallIcon(R.mipmap.ic_launcher)
+                //.setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
+                .setChannelId(MainActivity.id)
                 .setContentTitle("Service")   //Title message top row.
                 .setContentText(message)  //message when looking at the notification, second row
                 .setAutoCancel(true)   //allow auto cancel when pressed.
+                .setNumber(msgcount)
                 .build();  //finally build and return a Notification.
 
         //Show the notification
