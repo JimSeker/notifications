@@ -8,5 +8,7 @@ There is also have a Broadcast receiver, which NotificationDemo2 needs.  There i
 
 <b>NotificationDemo2</b> uses notificationDemo with the alarammanager to setup a notification to be sent later on (via the broadcast receiver in notificationdemo)
 
+<b>NotiODemo</b> is an API 26 only (android O, v8.0) demo to see the channel IDs and dots/badges.  Currently the dots are not showing, which is possibly: I need to be using studio 3.0 and/or the O preview 3 on a nexus 5x is not working correctly.  I'll test as then come out of preview to final versions (O and studio).
+
 These are example code for University of Wyoming, Cosc 4730 Mobile Programming course.
 All examples are for Android.
