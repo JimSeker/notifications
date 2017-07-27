@@ -1,5 +1,7 @@
 package edu.cs4730.notificationdemo;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -17,6 +19,13 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 
+/*
+ *  This one of two notification demos.  The second one uses the broadcast receiver located in this app.
+ *
+ *  This maybe helpful.
+ *  https://developer.android.com/training/notify-user/build-notification.html
+ *  https://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html
+ */
 public class MainActivity extends AppCompatActivity {
 
     NotificationManager nm;
@@ -27,14 +36,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        //Icon only button  oldway doesn't work on new systems at all.  removed in api 23!
-        /*findViewById(R.id.btn_old).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                oldway();
-            }
-        }); */
 
         //call a new activity so we can play with a broadcast receiver.
         findViewById(R.id.btn_mbc).setOnClickListener(new OnClickListener() {
@@ -47,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_icon_marquee).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                iconmsg();
+                simplenoti();
             }
         });
         //With Sounds, maybe not work in emulator
@@ -137,49 +138,25 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void iconmsg() {
+    /*
+     * create a notification with a icon and message, plus a title.
+     */
+    public void simplenoti() {
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
-        notificationIntent.putExtra("mytype", "iconmsg" + NotID);
+        notificationIntent.putExtra("mytype", "simple" + NotID); //not required, but used in this example.
         PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, 0);
         //Create a new notification. The construction Notification(int icon, CharSequence tickerText, long when) is deprecated.
         //If you target API level 11 or above, use Notification.Builder instead
         //With the second parameter, it would show a marquee
         Notification noti = new NotificationCompat.Builder(getApplicationContext())
+                .setSmallIcon(R.drawable.ic_announcement_black_24dp)
                 //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
-                .setSmallIcon(R.drawable.ic_launcher)
                 .setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
-                .setTicker("Message on status bar")  //message shown on the status bar
-                .setContentTitle("Marquee Message")   //Title message top row.
-                .setContentText("Icon and Message")  //message when looking at the notification, second row
+                .setContentTitle("Marquee or Title")   //Title message top row.
+                .setContentText("Message, this has only a small icon.")  //message when looking at the notification, second row
                 .setContentIntent(contentIntent)  //what activity to open.
                 .setAutoCancel(true)   //allow auto cancel when pressed.
                 .build();  //finally build and return a Notification.
-
-        //Show the notification
-        nm.notify(NotID, noti);
-        NotID++;
-    }
-
-    public void oldway() {
-        //Create a new notification. The construction Notification(int icon, CharSequence tickerText, long when) is deprecated.
-        //Should use the NotificationCompat if possible to use on anything above 2.3.3 (API 11+)
-        //The second parameter, if it it set to null, the notification will not show the marquee
-        Notification noti = new Notification(R.drawable.ic_launcher, "Old Way", System.currentTimeMillis());
-
-        //Set the activity to be launch when selected
-        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, 0, notificationIntent, 0);
-
-        //Set the notification details
-        //Second parameter: the title of the content
-        //Third parameter: the content message of the content
-
-
-        //not just depricated, but removed at this point.
-        //noti.setLatestEventInfo(getApplicationContext(), "Message Title", "Message Content", contentIntent);
-
-        //Set the notification to remove itself after selected
-        noti.flags = Notification.FLAG_AUTO_CANCEL;
 
         //Show the notification
         nm.notify(NotID, noti);
@@ -240,14 +217,26 @@ public class MainActivity extends AppCompatActivity {
         builder.setContentIntent(contentIntent);  //what activity to open.
         builder.setContentText(msg);
 
+        Notification noti = builder.build();
+        if (which ==4) {  //really annoy the user!
+            noti.flags = Notification.FLAG_INSISTENT;
+        }
+
 
         //Show the notification
-        nm.notify(NotID, builder.build());
+        nm.notify(NotID, noti);
         NotID++;
     }
+
+    /*
+     * create a notification with extra buttons.
+     * Note, that the intents each ahve the own number, otherwise, they are did the same thing.
+     *   something about android conserving memory, since the won't numbered differently.
+     */
+
     public void actionbuttons() {
 
-        //default one
+        //default, user clicks the notificaiton (not the buttons)
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.setAction("Click");
         notificationIntent.putExtra("mytype", "No cursing Notification");
@@ -271,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
         //Set up the notification
         Notification noti = new NotificationCompat.Builder(getApplicationContext())
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
-                .setSmallIcon(R.drawable.ic_launcher)
+                .setSmallIcon(R.drawable.ic_announcement_black_24dp)
                 .setTicker("This is a notification marquee")
                 .setWhen(System.currentTimeMillis())
                 .setContentTitle("Action Buttons")
@@ -407,7 +396,10 @@ public class MainActivity extends AppCompatActivity {
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), contentIntent);
         NotID++;
     }
+
+
     //creates a notification for lollipop with a popup/heads up message..
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void and5_notificaiton(){
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.putExtra("mytype", "iconmsg" + NotID);

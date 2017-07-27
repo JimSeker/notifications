@@ -7,29 +7,14 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".MainActivity" >
+    tools:context=".MainActivity">
 
-        <LinearLayout
-        android:id="@+id/linearLayout2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-    <Button
-        android:id="@+id/btn_old"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Oldway" />
-    <Button
-        android:id="@+id/btn_mbc"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="via Broadcast" />
-    
-</LinearLayout>
+
     <Button
         android:id="@+id/btn_icon_marquee"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Icon and Marquee" />
+        android:text="Simple Notification" />
 
     <LinearLayout
         android:id="@+id/linearLayout1"
@@ -53,7 +38,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Both" />
-                <Button
+
+        <Button
             android:id="@+id/btn_light"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -83,17 +69,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Expand like inbox" />
+
     <Button
         android:id="@+id/btn_cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Cancel last notification" />
-    
+
+    <Button
+        android:id="@+id/btn_mbc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="via Broadcast" />
+
     <Button
         android:id="@+id/btn_alarm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="With alarm in 2 minutes" />
+
     <Button
         android:id="@+id/noti_and5"
         android:layout_width="wrap_content"
