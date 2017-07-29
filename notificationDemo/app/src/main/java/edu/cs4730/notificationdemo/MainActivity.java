@@ -286,8 +286,9 @@ public class MainActivity extends AppCompatActivity {
         PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, 0);
 
         //Makes the Notification Builder
-        NotificationCompat.Builder build = new NotificationCompat.Builder(getApplicationContext()).setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
-                .setSmallIcon(R.drawable.ic_launcher)
+        NotificationCompat.Builder build = new NotificationCompat.Builder(getApplicationContext())
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+                .setSmallIcon(R.drawable.ic_announcement_black_24dp)
                 .setTicker("This is a notification marquee")
                 .setWhen(System.currentTimeMillis())
                 .setContentTitle("Message Title 7")
@@ -314,8 +315,9 @@ public class MainActivity extends AppCompatActivity {
         PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, 0);
 
         //Makes the Notification Builder
-        NotificationCompat.Builder build = new NotificationCompat.Builder(getApplicationContext()).setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
-                .setSmallIcon(R.drawable.ic_launcher)
+        NotificationCompat.Builder build = new NotificationCompat.Builder(getApplicationContext())
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+                .setSmallIcon(R.drawable.ic_announcement_black_24dp)
                 .setTicker("This is a notification marquee")
                 .setWhen(System.currentTimeMillis())
                 .setContentTitle("Message Title 8")
@@ -343,8 +345,9 @@ public class MainActivity extends AppCompatActivity {
         PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, 0);
 
         //Makes the Notification Builder
-        NotificationCompat.Builder build = new NotificationCompat.Builder(getApplicationContext()).setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
-                .setSmallIcon(R.drawable.ic_launcher)
+        NotificationCompat.Builder build = new NotificationCompat.Builder(getApplicationContext())
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+                .setSmallIcon(R.drawable.ic_announcement_black_24dp)
                 .setTicker("This is a notification marquee")
                 .setWhen(System.currentTimeMillis())
                 .setContentTitle("Message Title 9")
