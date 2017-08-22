@@ -74,14 +74,13 @@ public class MainActivity extends AppCompatActivity {
     public void makenoti(String message, int msgcount) {
 
         //Notification noti = new NotificationCompat.Builder(getApplicationContext())
-        Notification noti = new Notification.Builder(getApplicationContext())
+        Notification noti = new Notification.Builder(getApplicationContext(), MainActivity.id)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 //.setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
                 .setChannelId(MainActivity.id)
                 .setContentTitle("Service")   //Title message top row.
                 .setContentText(message)  //message when looking at the notification, second row
                 .setAutoCancel(true)   //allow auto cancel when pressed.
-                .setNumber(msgcount)
                 .build();  //finally build and return a Notification.
 
         //Show the notification

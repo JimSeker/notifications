@@ -62,7 +62,7 @@ public class MyNotiService extends Service {
                     } catch (InterruptedException e) {
                     }
                 }
-                String info= i+ "random "+r.nextInt(100);
+                String info= i+ " random="+r.nextInt(100);
                 Log.d(TAG, info);
                 if (messenger != null) {
                     Message mymsg = Message.obtain();
@@ -119,14 +119,14 @@ public class MyNotiService extends Service {
     public void makenoti(String message, int msgcount) {
 
         //Notification noti = new NotificationCompat.Builder(getApplicationContext())
-        Notification noti = new Notification.Builder(getApplicationContext())
+        Notification noti = new Notification.Builder(getApplicationContext(), MainActivity.id)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 //.setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
                 .setChannelId(MainActivity.id)
                 .setContentTitle("Service")   //Title message top row.
                 .setContentText(message)  //message when looking at the notification, second row
                 .setAutoCancel(true)   //allow auto cancel when pressed.
-                .setNumber(msgcount)
+                .setNumber(1)  //error in emulator?  when it seems to add, not set.  so when I set, 1,2,3,4,5, I get 15, not 5.  with 1, I get 5.
                 .build();  //finally build and return a Notification.
 
         //Show the notification
