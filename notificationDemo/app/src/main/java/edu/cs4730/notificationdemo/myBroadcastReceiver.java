@@ -13,7 +13,7 @@ import android.widget.Toast;
  * We could easy use this instead of DisplayNotification activity, because we don't
  * need a screen.
  */
-public class myBroadcastReciever extends BroadcastReceiver {
+public class myBroadcastReceiver extends BroadcastReceiver {
 	//we can have multiple Actions for this broadcastReceiver.
 	//a note, I have only declared one action though, but we could add more later.
 	private static final String ACTION = "edu.cs4730.notificationdemo.broadNotification";

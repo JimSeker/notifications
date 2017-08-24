@@ -55,8 +55,10 @@
                 android:value=".MainActivity" />
         </activity>
 
+
         <receiver
-            android:name=".myBroadcastReciever"
+            android:name=".myBroadcastReceiver"
+            android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="edu.cs4730.notificationdemo.broadNotification" />

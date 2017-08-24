@@ -3,6 +3,7 @@ package edu.cs4730.notificationdemo2;
 
 import java.util.Calendar;
 
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ import android.widget.Toast;
  *  https://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html
  */
 public class MainActivity extends AppCompatActivity {
+    public static String id = "test_channel_01";
     NotificationManager nm;
     int NotID = 1;
     final String TAG = "MainActivity";
@@ -49,9 +51,7 @@ public class MainActivity extends AppCompatActivity {
                 sendBroadcast(intent);
             }
         });
-		/*
-		 *
-		 */
+
         findViewById(R.id.button2).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -93,8 +93,31 @@ public class MainActivity extends AppCompatActivity {
                 activitybarnoti();
             }
         });
-
+        createchannel();
     }
+
+    /*
+     * for API 26+ create notification channels
+    */
+    private void createchannel() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel mChannel = new NotificationChannel(id,
+                    getString(R.string.channel_name),  //name of the channel
+                    NotificationManager.IMPORTANCE_LOW);   //importance level
+            //important level: default is is high on the phone.  high is urgent on the phone.  low is medium, so none is low?
+            // Configure the notification channel.
+            mChannel.setDescription(getString(R.string.channel_description));
+            // mChannel.enableLights(true);
+            // Sets the notification light color for notifications posted to this channel, if the device supports this feature.
+            //mChannel.setLightColor(Color.RED);
+            // mChannel.enableVibration(true);
+            mChannel.setShowBadge(true);
+            //mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+            nm.createNotificationChannel(mChannel);
+
+        }
+    }
+
 
     public void progressbarnoti() {
 
@@ -105,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         int incr;
                         //create the basic notification
-                        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext())
+                        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext(), id)
                                 .setOngoing(true)  //user can't remember the notification.
                                 .setSmallIcon(R.drawable.ic_announcement_black_24dp)
                                 .setContentTitle("Progress Bar")   //Title message top row.
@@ -154,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         int incr;
                         //create the basic notification
-                        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext())
+                        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext(), id)
                                 .setSmallIcon(R.drawable.ic_announcement_black_24dp)
                                 .setContentTitle("Activity Indicator")   //Title message top row.
                                 .setContentText("animated indicator bar");  //message when looking at the notification, second row
@@ -186,12 +209,4 @@ public class MainActivity extends AppCompatActivity {
         ).start();
         NotID++;
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
 }

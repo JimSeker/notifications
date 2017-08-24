@@ -3,4 +3,15 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+
+
+    <string name="channel_name">Test Channel 1</string>
+    <string name="channel_description">This is a test channel at level a high level, where lights, sound, and vibration are active.</string>
+
+
+    <string name="channel_name2">Test Channel 2</string>
+    <string name="channel_description2">This is a test channel at level a medium, where lights, sound, and vibration are active.</string>
+
+    <string name="channel_name3">Test Channel 3</string>
+    <string name="channel_description3">This is a test channel at level a Emergency level, where lights, sound, and vibration are active.</string>
 </resources>
