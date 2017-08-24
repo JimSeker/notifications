@@ -43,6 +43,7 @@ public class BroadCastRDemo extends AppCompatActivity {
     public void viaBroadcast() {
         //in the simplest form, create an intent with the action set for the broadcastreceiver and send it.
         Intent intent = new Intent("edu.cs4730.notificationdemo.broadNotification");
+        intent.setPackage("edu.cs4730.notificationdemo");  //in API 26, it must be explicit now.  generalized broadcasts are bad...
         //intent.setAction("edu.cs4730.notificationdemo.broadNotification");
         sendBroadcast(intent);
     }
@@ -52,6 +53,7 @@ public class BroadCastRDemo extends AppCompatActivity {
         //create the intent for the broadcast
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction("edu.cs4730.notificationdemo.broadNotification");
+        broadcastIntent.setPackage("edu.cs4730.notificationdemo"); //in API 26, it must be explicit now.
         //adding some extra inform again.
         broadcastIntent.putExtra("mytype", "Broadcast Msg" + NotID);
         //the pendingIntent now use the getBroadcast method.  Other no other changes.

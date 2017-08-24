@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
                 //A note, this may fail if notificationDemo1 is target at API 26.  Something change in 26 which is not documented well.
                 Intent intent = new Intent();
                 intent.setAction("edu.cs4730.notificationdemo.broadNotification");
+                intent.setPackage("edu.cs4730.notificationdemo"); //in API 26, it must be explicit now.
                 //adding some extra inform again.
                 intent.putExtra("mytype", "From notificationDemo2");
                 sendBroadcast(intent);
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
                 //same problem, this may fail if notificationDemo1 is targeted at API26.  I'm working to find a fix.
                 Intent intent = new Intent();
                 intent.setAction("edu.cs4730.notificationdemo.broadNotification");
+                intent.setPackage("edu.cs4730.notificationdemo"); //in API 26, it must be explicit now.
                 //adding some extra inform again.
                 intent.putExtra("mytype", "alarm from notificationDemo2");
 
