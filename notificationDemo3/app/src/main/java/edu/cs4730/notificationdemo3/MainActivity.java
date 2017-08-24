@@ -1,11 +1,14 @@
 package edu.cs4730.notificationdemo3;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -20,11 +23,14 @@ import android.util.Log;
  * three receivers that are here for the read, delete, reply intents.
  *
  * the reply receiver also updates the notification that we have dealt with he replay message as well.
+ *
+ * As note, with Android 8.x Oreo, they have changed how receivers work in the background.  This example
+ * may fail to set "replied" if the app is in the background.
  */
 
 
 public class MainActivity extends AppCompatActivity {
-
+    public static String id = "test_channel_01";
     MyFragment myFrag;
     String TAG = "MainActivity";
 
@@ -38,10 +44,11 @@ public class MainActivity extends AppCompatActivity {
             transaction.replace(R.id.container, myFrag);
             transaction.commit();
         }
+        createchannel();  //setup channels if needed.
     }
 
 
-    protected static final String ACTION_NOTIFICATION_DELETE = "edu.cs4730notificationdemo3.delete";
+    protected static final String ACTION_NOTIFICATION_DELETE = "edu.cs4730.notificationdemo3.delete";
     public static final String READ_ACTION = "edu.cs4730.notification3.ACTION_MESSAGE_READ";
     public static final String REPLY_ACTION = "edu.cs4730.notification3.ACTION_MESSAGE_REPLY";
     public static final String CONVERSATION_ID = "conversation_id";
@@ -81,12 +88,14 @@ public class MainActivity extends AppCompatActivity {
                     // Update the notification to stop the progress spinner.
                     NotificationManagerCompat notificationManager =
                             NotificationManagerCompat.from(context);
-                    Notification repliedNotification = new NotificationCompat.Builder(context)
+                    Notification repliedNotification = new NotificationCompat.Builder(context, id)
                             .setSmallIcon(R.mipmap.notification_icon)
                             .setLargeIcon(BitmapFactory.decodeResource(
                                     context.getResources(), R.mipmap.android_contact))
-                            .setDeleteIntent(myFrag.mDeletePendingIntent)  //se we know if they deleted it.
+                            .setDeleteIntent(myFrag.mDeletePendingIntent)  //so we know if they deleted it.
                             .setContentText("Replied")
+                            .setChannelId(MainActivity.id)
+                            .setOnlyAlertOnce(true)  //don't sound/vibrate/lights again!
                             .build();
                     notificationManager.notify(conversationId, repliedNotification);
                     myFrag.NotificationReply(conversationId, replyMessage);
@@ -98,18 +107,42 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
         registerReceiver(mDeleteReceiver, new IntentFilter(ACTION_NOTIFICATION_DELETE));
         registerReceiver(mReadReceiver, new IntentFilter(READ_ACTION));
         registerReceiver(mReplyReceiver, new IntentFilter(REPLY_ACTION));
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
         unregisterReceiver(mDeleteReceiver);
         unregisterReceiver(mReadReceiver);
         unregisterReceiver(mReplyReceiver);
     }
+
+    /*
+ * for API 26+ create notification channels
+*/
+    private void createchannel() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationChannel mChannel = new NotificationChannel(id,
+                    getString(R.string.channel_name),  //name of the channel
+                    NotificationManager.IMPORTANCE_DEFAULT);   //importance level
+            //important level: default is is high on the phone.  high is urgent on the phone.  low is medium, so none is low?
+            // Configure the notification channel.
+            mChannel.setDescription(getString(R.string.channel_description));
+            mChannel.enableLights(true);
+            //Sets the notification light color for notifications posted to this channel, if the device supports this feature.
+            mChannel.setLightColor(Color.RED);
+            mChannel.enableVibration(true);
+            mChannel.setShowBadge(true);
+            mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+            nm.createNotificationChannel(mChannel);
+
+        }
+    }
+
 }

@@ -37,13 +37,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-		/*
-        *
-		 */
         findViewById(R.id.button1).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 //We are going to call the broadcast receiver from notificationDemo1
+                //A note, this may fail if notificationDemo1 is target at API 26.  Something change in 26 which is not documented well.
                 Intent intent = new Intent();
                 intent.setAction("edu.cs4730.notificationdemo.broadNotification");
                 //adding some extra inform again.
@@ -56,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //We are going to call the broadcast receiver from notificationDemo1
+                //same problem, this may fail if notificationDemo1 is targeted at API26.  I'm working to find a fix.
                 Intent intent = new Intent();
                 intent.setAction("edu.cs4730.notificationdemo.broadNotification");
                 //adding some extra inform again.

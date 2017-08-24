@@ -68,9 +68,9 @@ public class MyFragment extends Fragment {
                 REQUEST_CODE, deleteIntent, 0);
 
 
-        mNumberOfNotifications = (TextView) view.findViewById(R.id.numNoti);
+        mNumberOfNotifications = view.findViewById(R.id.numNoti);
 
-        logger = (TextView) view.findViewById(R.id.logger);
+        logger =  view.findViewById(R.id.logger);
 
         // Supply actions to the button that is displayed on screen.
         view.findViewById(R.id.addbutton).setOnClickListener(new View.OnClickListener() {
@@ -144,7 +144,7 @@ public class MyFragment extends Fragment {
                         .setReplyAction(replyIntent, remoteInput);
 
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity().getApplicationContext())
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity().getApplicationContext(), MainActivity.id)
                 .setSmallIcon(R.mipmap.notification_icon)
                 .setLargeIcon(BitmapFactory.decodeResource(
                         getActivity().getApplicationContext().getResources(), R.mipmap.android_contact))
@@ -153,6 +153,7 @@ public class MyFragment extends Fragment {
                 .setContentTitle("Jim ")
                 .setContentIntent(readPendingIntent)
                 .setDeleteIntent(mDeletePendingIntent)
+                .setChannelId(MainActivity.id)
                 .extend(new NotificationCompat.CarExtender()
                         .setUnreadConversation(unreadConvBuilder.build())
                         .setColor(getActivity().getApplicationContext().getResources()
