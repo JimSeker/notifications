@@ -16,10 +16,16 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.util.Random;
+
 import android.os.Process;
 
-//https://developer.android.com/preview/features/notification-badges.html
-//this example doesn't work yet.
+/**
+ * https://developer.android.com/preview/features/notification-badges.html
+ *
+ * This will attempt to put numbers instead of dots as badges.  Numbers must be supported by the
+ * launcher, which don't appear to be supported on the pixel/pixel2 launcher.  But it does mostly work
+ * in the emulators.  On the pixel2, instead of nubmers, it's just the dot.
+ */
 
 
 public class MyNotiService extends Service {
@@ -32,7 +38,7 @@ public class MyNotiService extends Service {
 
     //my variables
     Random r;
-    int NotID =1;
+    int NotID = 1;
     NotificationManager nm;
 
     // Handler that receives messages from the thread
@@ -40,29 +46,30 @@ public class MyNotiService extends Service {
         public ServiceHandler(Looper looper) {
             super(looper);
         }
+
         @Override
         public void handleMessage(Message msg) {
             // Normally we would do some work here, like download a file.
             // For our sample, we just sleep for 5 seconds.
             //setup how many messages
             nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            int times =0, i;
+            int times = 0, i;
             Messenger messenger = null;
             Bundle extras = msg.getData();
 
 
             if (extras != null) {
-                times = extras.getInt("times",0);
+                times = extras.getInt("times", 0);
                 messenger = (Messenger) extras.get("MESSENGER");
             }
-            for (i=0; i<times; i++ ) {
+            for (i = 0; i < times; i++) {
                 synchronized (this) {
                     try {
                         wait(5000);
                     } catch (InterruptedException e) {
                     }
                 }
-                String info= i+ " random="+r.nextInt(100);
+                String info = i + " random=" + r.nextInt(100);
                 Log.d(TAG, info);
                 if (messenger != null) {
                     Message mymsg = Message.obtain();
@@ -70,11 +77,11 @@ public class MyNotiService extends Service {
                     try {
                         messenger.send(mymsg);
                     } catch (android.os.RemoteException e1) {
-                        Log.wtf(TAG , "Exception sending message", e1);
+                        Log.wtf(TAG, "Exception sending message", e1);
                     }
                 } else {
                     //no handler, so use notification
-                    makenoti(info, i+1);
+                    makenoti(info, i + 1);
                 }
             }
             // Stop the service using the startId, so that we don't stop
@@ -112,22 +119,24 @@ public class MyNotiService extends Service {
         // If we get killed, after returning from here, restart
         return START_STICKY;
     }
+
     @Override
     public void onDestroy() {
         Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
     }
+
     public void makenoti(String message, int msgcount) {
 
         //Notification noti = new NotificationCompat.Builder(getApplicationContext())
         Notification noti = new Notification.Builder(getApplicationContext(), MainActivity.id)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                //.setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
-                .setChannelId(MainActivity.id)
-                .setContentTitle("Service")   //Title message top row.
-                .setContentText(message)  //message when looking at the notification, second row
-                .setAutoCancel(true)   //allow auto cancel when pressed.
-                .setNumber(1)  //error in emulator?  when it seems to add, not set.  so when I set, 1,2,3,4,5, I get 15, not 5.  with 1, I get 5.
-                .build();  //finally build and return a Notification.
+            .setSmallIcon(R.mipmap.ic_launcher)
+            //.setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
+            .setChannelId(MainActivity.id)
+            .setContentTitle("Service")   //Title message top row.
+            .setContentText(message)  //message when looking at the notification, second row
+            .setAutoCancel(true)   //allow auto cancel when pressed.
+            .setNumber(1)  //error in emulator?  when it seems to add, not set.  so when I set, 1,2,3,4,5, I get 15, not 5.  with 1, I get 5.
+            .build();  //finally build and return a Notification.
 
         //Show the notification
         nm.notify(NotID, noti);

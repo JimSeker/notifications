@@ -6,16 +6,18 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.view.View;
 
 
-/*
-  Very simple main to start the service that will then show create notifications for the O notification channels and icon dots.
-
-  Note for the badges (dots) to work, I think (untested) you need studio 3.0 with the adaptive icons.
-  Or preview 3 on a nexus 5x is not working correctly, also possible.  I'll see when the final version of 8 and studio 3.0 are out.
+/**
+ * Very simple main to start the service that will then show create notifications for the O notification channels and icon dots.
+ * <p>
+ * Note for the badges (dots) to work, you need something like google launcher, where badges are supported
+ *   also turned on, since they can be turned off in some launchers as well.
  */
 
 public class MainActivity extends AppCompatActivity {
@@ -40,17 +42,16 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.button2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                makenoti("hi htere", 1);
+                makenoti("hi there", 1);
             }
         });
-
 
         createchannel();
     }
 
     private void createchannel() {
         mNotificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
 // The user-visible name of the channel.
         CharSequence name = getString(R.string.channel_name);
@@ -75,13 +76,13 @@ public class MainActivity extends AppCompatActivity {
 
         //Notification noti = new NotificationCompat.Builder(getApplicationContext())
         Notification noti = new Notification.Builder(getApplicationContext(), MainActivity.id)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                //.setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
-                .setChannelId(MainActivity.id)
-                .setContentTitle("Service")   //Title message top row.
-                .setContentText(message)  //message when looking at the notification, second row
-                .setAutoCancel(true)   //allow auto cancel when pressed.
-                .build();  //finally build and return a Notification.
+            .setSmallIcon(R.mipmap.ic_launcher)
+            //.setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
+            .setChannelId(MainActivity.id)
+            .setContentTitle("Service")   //Title message top row.
+            .setContentText(message)  //message when looking at the notification, second row
+            .setAutoCancel(true)   //allow auto cancel when pressed.
+            .build();  //finally build and return a Notification.
 
         //Show the notification
         mNotificationManager.notify(1, noti);
