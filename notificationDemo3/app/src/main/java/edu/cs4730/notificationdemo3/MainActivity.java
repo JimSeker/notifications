@@ -9,11 +9,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.app.RemoteInput;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.fragment.app.FragmentTransaction;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.RemoteInput;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.util.Log;
 
@@ -21,9 +23,9 @@ import android.util.Log;
 /**
  * while most of the work of creating the notifications is in the fragment, we need to create
  * three receivers that are here for the read, delete, reply intents.
- *
+ * <p>
  * the reply receiver also updates the notification that we have dealt with he replay message as well.
- *
+ * <p>
  * As note, with Android 8.x Oreo, they have changed how receivers work in the background.  This example
  * may fail to set "replied" if the app is in the background.
  */
@@ -87,16 +89,16 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "Notification " + conversationId + " reply is " + replyMessage);
                     // Update the notification to stop the progress spinner.
                     NotificationManagerCompat notificationManager =
-                            NotificationManagerCompat.from(context);
+                        NotificationManagerCompat.from(context);
                     Notification repliedNotification = new NotificationCompat.Builder(context, id)
-                            .setSmallIcon(R.mipmap.notification_icon)
-                            .setLargeIcon(BitmapFactory.decodeResource(
-                                    context.getResources(), R.mipmap.android_contact))
-                            .setDeleteIntent(myFrag.mDeletePendingIntent)  //so we know if they deleted it.
-                            .setContentText("Replied")
-                            .setChannelId(MainActivity.id)
-                            .setOnlyAlertOnce(true)  //don't sound/vibrate/lights again!
-                            .build();
+                        .setSmallIcon(R.mipmap.notification_icon)
+                        .setLargeIcon(BitmapFactory.decodeResource(
+                            context.getResources(), R.mipmap.android_contact))
+                        .setDeleteIntent(myFrag.mDeletePendingIntent)  //so we know if they deleted it.
+                        .setContentText("Replied")
+                        .setChannelId(MainActivity.id)
+                        .setOnlyAlertOnce(true)  //don't sound/vibrate/lights again!
+                        .build();
                     notificationManager.notify(conversationId, repliedNotification);
                     myFrag.NotificationReply(conversationId, replyMessage);
                 }
@@ -123,14 +125,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /*
- * for API 26+ create notification channels
-*/
+     * for API 26+ create notification channels
+     */
     private void createchannel() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             NotificationChannel mChannel = new NotificationChannel(id,
-                    getString(R.string.channel_name),  //name of the channel
-                    NotificationManager.IMPORTANCE_DEFAULT);   //importance level
+                getString(R.string.channel_name),  //name of the channel
+                NotificationManager.IMPORTANCE_DEFAULT);   //importance level
             //important level: default is is high on the phone.  high is urgent on the phone.  low is medium, so none is low?
             // Configure the notification channel.
             mChannel.setDescription(getString(R.string.channel_description));

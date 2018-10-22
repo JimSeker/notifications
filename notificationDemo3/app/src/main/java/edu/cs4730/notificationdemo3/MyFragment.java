@@ -1,16 +1,19 @@
 package edu.cs4730.notificationdemo3;
 
-
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.app.RemoteInput;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.RemoteInput;
+import androidx.core.content.ContextCompat;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +24,6 @@ import android.widget.TextView;
  * This is an example of how to create notifications that are compatible with android auto (and wear)
  * how to see if the notification has been read or deleted
  * and how to get replies to the message via the remoteinput
- *
  */
 public class MyFragment extends Fragment {
     private NotificationManager mNotificationManager;
@@ -32,7 +34,7 @@ public class MyFragment extends Fragment {
     public PendingIntent mDeletePendingIntent;
     private static final int REQUEST_CODE = 2323;
 
-    TextView mNumberOfNotifications , logger;
+    TextView mNumberOfNotifications, logger;
 
     int NotificationNum = 1;
 
@@ -41,7 +43,7 @@ public class MyFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_my, container, false);
@@ -54,7 +56,7 @@ public class MyFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         //for the number of active notifications
         mNotificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
@@ -65,12 +67,12 @@ public class MyFragment extends Fragment {
         // Create a PendingIntent to be fired upon deletion of a Notification.
         Intent deleteIntent = new Intent(MainActivity.ACTION_NOTIFICATION_DELETE);
         mDeletePendingIntent = PendingIntent.getBroadcast(getActivity(),
-                REQUEST_CODE, deleteIntent, 0);
+            REQUEST_CODE, deleteIntent, 0);
 
 
         mNumberOfNotifications = view.findViewById(R.id.numNoti);
 
-        logger =  view.findViewById(R.id.logger);
+        logger = view.findViewById(R.id.logger);
 
         // Supply actions to the button that is displayed on screen.
         view.findViewById(R.id.addbutton).setOnClickListener(new View.OnClickListener() {
@@ -97,72 +99,75 @@ public class MyFragment extends Fragment {
     // Creates an intent that will be triggered when a message is marked as read.
     private Intent getMessageReadIntent(int id) {
         return new Intent()
-                .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-                .setAction(MainActivity.READ_ACTION)
-                .putExtra(MainActivity.CONVERSATION_ID, id);
+            .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+            .setAction(MainActivity.READ_ACTION)
+            .putExtra(MainActivity.CONVERSATION_ID, id);
     }
 
     // Creates an Intent that will be triggered when a voice reply is received.
     private Intent getMessageReplyIntent(int conversationId) {
         return new Intent()
-                .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-                .setAction(MainActivity.REPLY_ACTION)
-                .putExtra(MainActivity.CONVERSATION_ID, conversationId);
+            .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+            .setAction(MainActivity.REPLY_ACTION)
+            .putExtra(MainActivity.CONVERSATION_ID, conversationId);
     }
 
     void createNotification() {
         // A pending Intent for reads
         PendingIntent readPendingIntent = PendingIntent.getBroadcast(getActivity().getApplicationContext(),
-                NotificationNum,
-                getMessageReadIntent(NotificationNum),
-                PendingIntent.FLAG_UPDATE_CURRENT);
+            NotificationNum,
+            getMessageReadIntent(NotificationNum),
+            PendingIntent.FLAG_UPDATE_CURRENT);
 
+        // A choices list.
+        String[] choices = new String[]{"No", "Yes", "Maybe", "Go away!"};
         // Build a RemoteInput for receiving voice input in a Car Notification or text input on
         // devices that support text input (like devices on Android N and above).
         RemoteInput remoteInput = new RemoteInput.Builder(MainActivity.EXTRA_REMOTE_REPLY)
-                .setLabel("Reply")
-                .build();
+            .setLabel("Reply")
+            .setChoices(choices)
+            .build();
 
         // Building a Pending Intent for the reply action to trigger
         PendingIntent replyIntent = PendingIntent.getBroadcast(getActivity().getApplicationContext(),
-                NotificationNum,
-                getMessageReplyIntent(NotificationNum),
-                PendingIntent.FLAG_UPDATE_CURRENT);
+            NotificationNum,
+            getMessageReplyIntent(NotificationNum),
+            PendingIntent.FLAG_UPDATE_CURRENT);
 
         // Build an Android N compatible Remote Input enabled action.
         NotificationCompat.Action actionReplyByRemoteInput = new NotificationCompat.Action.Builder(
-                R.mipmap.notification_icon, "Reply", replyIntent)
-                .addRemoteInput(remoteInput)
-                .build();
+            R.mipmap.notification_icon, "Reply", replyIntent)
+            .addRemoteInput(remoteInput)
+            .build();
 
         // Create the UnreadConversation and populate it with the participant name,
         // read and reply intents.
         NotificationCompat.CarExtender.UnreadConversation.Builder unreadConvBuilder =
-                new NotificationCompat.CarExtender.UnreadConversation.Builder("Jim ")
-                        .setLatestTimestamp(System.currentTimeMillis())
-                        .setReadPendingIntent(readPendingIntent)
-                        .setReplyAction(replyIntent, remoteInput);
+            new NotificationCompat.CarExtender.UnreadConversation.Builder("Jim ")
+                .setLatestTimestamp(System.currentTimeMillis())
+                .setReadPendingIntent(readPendingIntent)
+                .setReplyAction(replyIntent, remoteInput);
 
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity().getApplicationContext(), MainActivity.id)
-                .setSmallIcon(R.mipmap.notification_icon)
-                .setLargeIcon(BitmapFactory.decodeResource(
-                        getActivity().getApplicationContext().getResources(), R.mipmap.android_contact))
-                .setContentText("Are you working?")
-                .setWhen(System.currentTimeMillis())
-                .setContentTitle("Jim ")
-                .setContentIntent(readPendingIntent)
-                .setDeleteIntent(mDeletePendingIntent)
-                .setChannelId(MainActivity.id)
-                .extend(new NotificationCompat.CarExtender()
-                        .setUnreadConversation(unreadConvBuilder.build())
-                        .setColor(getActivity().getApplicationContext().getResources()
-                                .getColor(R.color.default_color_light)))
-                .addAction(actionReplyByRemoteInput);
+            .setSmallIcon(R.mipmap.notification_icon)
+            .setLargeIcon(BitmapFactory.decodeResource(
+                getActivity().getApplicationContext().getResources(), R.mipmap.android_contact))
+            .setContentText("Are you working?")
+            .setWhen(System.currentTimeMillis())
+            .setContentTitle("Jim ")
+            .setContentIntent(readPendingIntent)
+            .setDeleteIntent(mDeletePendingIntent)
+            .setChannelId(MainActivity.id)
+            .extend(new NotificationCompat.CarExtender()
+                .setUnreadConversation(unreadConvBuilder.build())
+                .setColor(ContextCompat.getColor(getContext(), R.color.default_color_light))
+            )
+            .addAction(actionReplyByRemoteInput);
 
-       logger.append("Sending notification " +NotificationNum + "\n");
+        logger.append("Sending notification " + NotificationNum + "\n");
 
-        mNotificationManagerCompat.notify( NotificationNum, builder.build());
+        mNotificationManagerCompat.notify(NotificationNum, builder.build());
         NotificationNum++;
         //update the number of notifications.
         updateNumberOfNotifications();
@@ -173,13 +178,13 @@ public class MyFragment extends Fragment {
      * helper method that the mainactivity can call, to update the logger that a message has been read.
      */
     public void NotificationRead(int id) {
-        logger.append("Notification " +id + "has been read\n");
+        logger.append("Notification " + id + "has been read\n");
     }
 
     /*
-    * helper method that the mainactivity can use to update the logger with the reply to notification.
+     * helper method that the mainactivity can use to update the logger with the reply to notification.
      */
     public void NotificationReply(int id, String message) {
-        logger.append("Notification " +id + ": reply is "+ message+"\n");
+        logger.append("Notification " + id + ": reply is " + message + "\n");
     }
 }
