@@ -6,10 +6,11 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
+
+import androidx.core.app.NotificationCompat;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class BroadCastRDemo extends AppCompatActivity {
     //"edu.cs4730.notificationdemo.broadNotification"
@@ -45,6 +46,7 @@ public class BroadCastRDemo extends AppCompatActivity {
         Intent intent = new Intent("edu.cs4730.notificationdemo.broadNotification");
         intent.setPackage("edu.cs4730.notificationdemo");  //in API 26, it must be explicit now.  generalized broadcasts are bad...
         //intent.setAction("edu.cs4730.notificationdemo.broadNotification");
+        intent.putExtra("mytype", "direct send");
         sendBroadcast(intent);
     }
 
@@ -60,15 +62,15 @@ public class BroadCastRDemo extends AppCompatActivity {
         PendingIntent contentIntent = PendingIntent.getBroadcast(BroadCastRDemo.this, NotID, broadcastIntent, 0);
         //the rest of the notification is just like before.
         Notification noti = new NotificationCompat.Builder(getApplicationContext(), MainActivity.id1)
-                //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
-                .setSmallIcon(R.drawable.ic_launcher)
-                .setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
-                .setContentTitle("Notification to BroadcastReciever")   //Title message top row.
-                .setContentText("Click me!")  //message when looking at the notification, second row
-                .setContentIntent(contentIntent)  //what activity to open.
-                .setAutoCancel(true)   //allow auto cancel when pressed.
-                .setChannelId(MainActivity.id1)
-                .build();  //finally build and return a Notification.
+            //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
+            .setContentTitle("Notification to BroadcastReciever")   //Title message top row.
+            .setContentText("Click me!")  //message when looking at the notification, second row
+            .setContentIntent(contentIntent)  //what activity to open.
+            .setAutoCancel(true)   //allow auto cancel when pressed.
+            .setChannelId(MainActivity.id1)
+            .build();  //finally build and return a Notification.
 
         //Show the notification
         nm.notify(NotID, noti);

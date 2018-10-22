@@ -1,9 +1,9 @@
 package edu.cs4730.notificationdemo;
 
-/*
+/**
  * This activity will not display to the screen (hopefully).  It just sets a notification
  * and then exits (finish())
- * 
+ * <p>
  * http://mobiforge.com/developing/story/displaying-status-bar-notifications-android
  */
 
@@ -13,8 +13,9 @@ import android.app.PendingIntent;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.core.app.NotificationCompat;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class DisplayNotification extends AppCompatActivity {
     /**
@@ -37,14 +38,14 @@ public class DisplayNotification extends AppCompatActivity {
 
         //create the notification
         Notification notif = new NotificationCompat.Builder(getApplicationContext(), MainActivity.id1)
-                .setSmallIcon(R.drawable.ic_launcher)
-                .setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
-                .setContentTitle("Time's up!")   //Title message top row.
-                .setContentText("This is your alert, courtesy of the AlarmManager")  //message when looking at the notification, second row
-                .setContentIntent(contentIntent)  //what activity to open.
-                .setAutoCancel(true)   //allow auto cancel when pressed.
-                .setChannelId(MainActivity.id1)
-                .build();  //finally build and return a Notification.
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
+            .setContentTitle("Time's up!")   //Title message top row.
+            .setContentText("This is your alert, courtesy of the AlarmManager")  //message when looking at the notification, second row
+            .setContentIntent(contentIntent)  //what activity to open.
+            .setAutoCancel(true)   //allow auto cancel when pressed.
+            .setChannelId(MainActivity.id1)
+            .build();  //finally build and return a Notification.
 
         //Show the notification
         nm.notify(notifID, notif);
