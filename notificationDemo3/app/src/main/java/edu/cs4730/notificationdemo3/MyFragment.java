@@ -59,9 +59,9 @@ public class MyFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         //for the number of active notifications
-        mNotificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager = (NotificationManager) requireActivity().getSystemService(Context.NOTIFICATION_SERVICE);
         //to send notifications and everything else.
-        mNotificationManagerCompat = NotificationManagerCompat.from(getActivity().getApplicationContext());
+        mNotificationManagerCompat = NotificationManagerCompat.from(requireActivity().getApplicationContext());
 
 
         // Create a PendingIntent to be fired upon deletion of a Notification.

@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
     public void simplenoti() {
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.putExtra("mytype", "simple" + NotID); //not required, but used in this example.
-        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
         //Create a new notification. The construction Notification(int icon, CharSequence tickerText, long when) is deprecated.
         //If you target API level 11 or above, use Notification.Builder instead
         //With the second parameter, it would show a marquee
@@ -274,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
 
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.putExtra("mytype", msg);
-        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
         builder.setContentIntent(contentIntent);  //what activity to open.
         builder.setContentText(msg);
 
@@ -301,22 +301,22 @@ public class MainActivity extends AppCompatActivity {
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.setAction("Click");
         notificationIntent.putExtra("mytype", "No cursing Notification");
-        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
         //first button
         Intent notificationIntent1 = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.setAction("button1");
         notificationIntent1.putExtra("mytype", "Action Button1");
-        PendingIntent contentIntent1 = PendingIntent.getActivity(MainActivity.this, NotID + 1, notificationIntent1, 0);
+        PendingIntent contentIntent1 = PendingIntent.getActivity(MainActivity.this, NotID + 1, notificationIntent1, PendingIntent.FLAG_IMMUTABLE);
         //button 2
         Intent notificationIntent2 = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.setAction("button2");
         notificationIntent2.putExtra("mytype", "Action Button2");
-        PendingIntent contentIntent2 = PendingIntent.getActivity(MainActivity.this, NotID + 2, notificationIntent2, 0);
+        PendingIntent contentIntent2 = PendingIntent.getActivity(MainActivity.this, NotID + 2, notificationIntent2, PendingIntent.FLAG_IMMUTABLE);
         //button 2
         Intent notificationIntent3 = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.setAction("button3");
         notificationIntent3.putExtra("mytype", "Action Button3");
-        PendingIntent contentIntent3 = PendingIntent.getActivity(MainActivity.this, NotID + 3, notificationIntent3, 0);
+        PendingIntent contentIntent3 = PendingIntent.getActivity(MainActivity.this, NotID + 3, notificationIntent3, PendingIntent.FLAG_IMMUTABLE);
 
         //Set up the notification
         Notification noti = new NotificationCompat.Builder(getApplicationContext(), id1)
@@ -345,7 +345,7 @@ public class MainActivity extends AppCompatActivity {
         //Set the activity to be launch when selected
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.putExtra("mytype", "Expand text");
-        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
         //Makes the Notification Builder
         NotificationCompat.Builder build = new NotificationCompat.Builder(getApplicationContext(), id1)
@@ -375,7 +375,7 @@ public class MainActivity extends AppCompatActivity {
         //Set the activity to be launch when selected
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.putExtra("mytype", "Expand Image");
-        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
         //Makes the Notification Builder
         NotificationCompat.Builder build = new NotificationCompat.Builder(getApplicationContext(), id1)
@@ -406,7 +406,7 @@ public class MainActivity extends AppCompatActivity {
         //Set the activity to be launch when selected
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.putExtra("mytype", "Expand Inbox");
-        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
         //Makes the Notification Builder
         NotificationCompat.Builder build = new NotificationCompat.Builder(getApplicationContext(), id1)
@@ -457,7 +457,7 @@ public class MainActivity extends AppCompatActivity {
         Intent notificationIntent = new Intent("edu.cs4730.notificationdemo.DisplayNotification");
         notificationIntent.putExtra("NotifID", NotID);
 
-        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
         Log.i("MainACtivity", "Set alarm, I hope");
 
 
@@ -472,7 +472,7 @@ public class MainActivity extends AppCompatActivity {
     public void and5_notificaiton() {
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.putExtra("mytype", "iconmsg" + NotID);
-        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
         Notification noti = new NotificationCompat.Builder(getApplicationContext(), id3)
             //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
             .setSmallIcon(R.drawable.ic_launcher)
@@ -480,7 +480,7 @@ public class MainActivity extends AppCompatActivity {
             .setContentTitle("Lollipop notificaiton")   //Title message top row.
             .setContentText("This should be an annoying heads up message.")  //message when looking at the notification, second row
             //the following 2 lines cause it to show up as popup message at the top in android 5 systems.
-            .setPriority(Notification.PRIORITY_MAX)  //could also be PRIORITY_HIGH.  needed for LOLLIPOP, M and N.  But not Oreo
+            .setPriority(NotificationManager.IMPORTANCE_HIGH)  //could also be PRIORITY_HIGH.  needed for LOLLIPOP, M and N.  But not Oreo
             .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000})  //for the heads/pop up must have sound or vibrate
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)  //VISIBILITY_PRIVATE or VISIBILITY_SECRET
             .setContentIntent(contentIntent)  //what activity to open.

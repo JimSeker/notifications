@@ -34,7 +34,7 @@ public class DisplayNotification extends AppCompatActivity {
         // the notification---
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.putExtra("mytype", "2 minutes later?");
-        PendingIntent contentIntent = PendingIntent.getActivity(this, notifID, notificationIntent, 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, notifID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
         //create the notification
         Notification notif = new NotificationCompat.Builder(getApplicationContext(), MainActivity.id1)

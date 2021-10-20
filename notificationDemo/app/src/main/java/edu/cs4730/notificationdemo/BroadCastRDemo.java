@@ -59,7 +59,7 @@ public class BroadCastRDemo extends AppCompatActivity {
         //adding some extra inform again.
         broadcastIntent.putExtra("mytype", "Broadcast Msg" + NotID);
         //the pendingIntent now use the getBroadcast method.  Other no other changes.
-        PendingIntent contentIntent = PendingIntent.getBroadcast(BroadCastRDemo.this, NotID, broadcastIntent, 0);
+        PendingIntent contentIntent = PendingIntent.getBroadcast(BroadCastRDemo.this, NotID, broadcastIntent, PendingIntent.FLAG_IMMUTABLE);
         //the rest of the notification is just like before.
         Notification noti = new NotificationCompat.Builder(getApplicationContext(), MainActivity.id1)
             //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))

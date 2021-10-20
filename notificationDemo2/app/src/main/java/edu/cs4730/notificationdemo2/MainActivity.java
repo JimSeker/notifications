@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
                 calendar.set(Calendar.SECOND, 0);
 
 
-                PendingIntent contentIntent = PendingIntent.getBroadcast(MainActivity.this, NotID, intent, 0);
+                PendingIntent contentIntent = PendingIntent.getBroadcast(MainActivity.this, NotID, intent, PendingIntent.FLAG_IMMUTABLE);
                 Log.i("MainActivity", "Set alarm, I hope");
                 Toast.makeText(getApplicationContext(), "Alarm for " + calendar.get(Calendar.MINUTE), Toast.LENGTH_SHORT).show();
 
