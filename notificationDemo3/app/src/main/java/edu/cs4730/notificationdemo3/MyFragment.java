@@ -67,7 +67,7 @@ public class MyFragment extends Fragment {
         // Create a PendingIntent to be fired upon deletion of a Notification.
         Intent deleteIntent = new Intent(MainActivity.ACTION_NOTIFICATION_DELETE);
         mDeletePendingIntent = PendingIntent.getBroadcast(getActivity(),
-            REQUEST_CODE, deleteIntent, 0);
+            REQUEST_CODE, deleteIntent, PendingIntent.FLAG_IMMUTABLE);
 
 
         mNumberOfNotifications = view.findViewById(R.id.numNoti);
