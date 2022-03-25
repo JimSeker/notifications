@@ -23,8 +23,8 @@ import android.os.Process;
  * https://developer.android.com/preview/features/notification-badges.html
  *
  * This will attempt to put numbers instead of dots as badges.  Numbers must be supported by the
- * launcher, which don't appear to be supported on the pixel/pixel2 launcher.  But it does mostly work
- * in the emulators.  On the pixel2, instead of nubmers, it's just the dot.
+ * launcher, which don't appear to be supported on the pixel/pixel2/pixel3(android12) launcher.  But it does mostly work
+ * in the emulators.  On the pixel2 and 3, instead of numbers, it's just the dot.  On the 3 a long press shows the numbers though.
  */
 
 
@@ -126,8 +126,6 @@ public class MyNotiService extends Service {
     }
 
     public void makenoti(String message, int msgcount) {
-
-        //Notification noti = new NotificationCompat.Builder(getApplicationContext())
         Notification noti = new Notification.Builder(getApplicationContext(), MainActivity.id)
             .setSmallIcon(R.mipmap.ic_launcher)
             //.setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
@@ -137,7 +135,6 @@ public class MyNotiService extends Service {
             .setAutoCancel(true)   //allow auto cancel when pressed.
             .setNumber(1)  //error in emulator?  when it seems to add, not set.  so when I set, 1,2,3,4,5, I get 15, not 5.  with 1, I get 5.
             .build();  //finally build and return a Notification.
-
         //Show the notification
         nm.notify(NotID, noti);
         NotID++;

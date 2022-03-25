@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //We are going to call the broadcast receiver from notificationDemo1
-                //A note, this may fail if notificationDemo1 is target at API 26.  Something change in 26 which is not documented well.
                 Intent intent = new Intent();
                 intent.setAction("edu.cs4730.notificationdemo.broadNotification");
                 intent.setPackage("edu.cs4730.notificationdemo"); //in API 26, it must be explicit now.
@@ -102,22 +101,19 @@ public class MainActivity extends AppCompatActivity {
      * for API 26+ create notification channels
      */
     private void createchannel() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationChannel mChannel = new NotificationChannel(id,
-                getString(R.string.channel_name),  //name of the channel
-                NotificationManager.IMPORTANCE_LOW);   //importance level
-            //important level: default is is high on the phone.  high is urgent on the phone.  low is medium, so none is low?
-            // Configure the notification channel.
-            mChannel.setDescription(getString(R.string.channel_description));
-            // mChannel.enableLights(true);
-            // Sets the notification light color for notifications posted to this channel, if the device supports this feature.
-            //mChannel.setLightColor(Color.RED);
-            // mChannel.enableVibration(true);
-            mChannel.setShowBadge(true);
-            //mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
-            nm.createNotificationChannel(mChannel);
-
-        }
+        NotificationChannel mChannel = new NotificationChannel(id,
+            getString(R.string.channel_name),  //name of the channel
+            NotificationManager.IMPORTANCE_LOW);   //importance level
+        //important level: default is is high on the phone.  high is urgent on the phone.  low is medium, so none is low?
+        // Configure the notification channel.
+        mChannel.setDescription(getString(R.string.channel_description));
+        // mChannel.enableLights(true);
+        // Sets the notification light color for notifications posted to this channel, if the device supports this feature.
+        //mChannel.setLightColor(Color.RED);
+        // mChannel.enableVibration(true);
+        mChannel.setShowBadge(true);
+        //mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+        nm.createNotificationChannel(mChannel);
     }
 
 
@@ -162,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
                     nm.notify(NotID, mBuilder.build());
                 }
             }
-// Starts the thread by calling the run() method in its Runnable
+        // Starts the thread by calling the run() method in its Runnable
         ).start();
         NotID++;
     }
@@ -207,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
                     nm.notify(NotID, mBuilder.build());
                 }
             }
-// Starts the thread by calling the run() method in its Runnable
+        // Starts the thread by calling the run() method in its Runnable
         ).start();
         NotID++;
     }

@@ -1,15 +1,10 @@
 package edu.cs4730.notificationdemo;
 
-import android.annotation.TargetApi;
-import android.app.NotificationChannel;
-import android.graphics.Color;
-import android.os.Build;
-import android.os.Bundle;
-
-import androidx.appcompat.app.AppCompatActivity;
-
 import java.util.Calendar;
 
+import android.app.NotificationChannel;
+import android.graphics.Color;
+import android.os.Bundle;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -17,12 +12,13 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
-
-import androidx.core.app.NotificationCompat;
-
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+
 
 /**
  * This one of two notification demos.  The second one uses the broadcast receiver located in this app.
@@ -147,57 +143,54 @@ public class MainActivity extends AppCompatActivity {
         createchannel();
     }
 
-    /*
-     * for API 26+ create notification channels
+    /**
+     * creates notification channels (required for API 26+)
      */
     private void createchannel() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationChannel mChannel = new NotificationChannel(id1,
-                getString(R.string.channel_name),  //name of the channel
-                NotificationManager.IMPORTANCE_DEFAULT);   //importance level
-            //important level: default is is high on the phone.  high is urgent on the phone.  low is medium, so none is low?
-            // Configure the notification channel.
-            mChannel.setDescription(getString(R.string.channel_description));
-            mChannel.enableLights(true);
-            // Sets the notification light color for notifications posted to this channel, if the device supports this feature.
-            mChannel.setLightColor(Color.RED);
-            mChannel.enableVibration(true);
-            mChannel.setShowBadge(true);
-            mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
-            nm.createNotificationChannel(mChannel);
+        NotificationChannel mChannel = new NotificationChannel(id1,
+            getString(R.string.channel_name),  //name of the channel
+            NotificationManager.IMPORTANCE_DEFAULT);   //importance level
+        //important level: default is is high on the phone.  high is urgent on the phone.  low is medium, so none is low?
+        // Configure the notification channel.
+        mChannel.setDescription(getString(R.string.channel_description));
+        mChannel.enableLights(true);
+        // Sets the notification light color for notifications posted to this channel, if the device supports this feature.
+        mChannel.setLightColor(Color.RED);
+        mChannel.enableVibration(true);
+        mChannel.setShowBadge(true);
+        mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+        nm.createNotificationChannel(mChannel);
 
-            //a medium level channel
-            mChannel = new NotificationChannel(id2,
-                getString(R.string.channel_name2),  //name of the channel
-                NotificationManager.IMPORTANCE_LOW);   //importance level
-            // Configure the notification channel.
-            mChannel.setDescription(getString(R.string.channel_description2));
-            mChannel.enableLights(true);
-            // Sets the notification light color for notifications posted to this channel, if the device supports this feature.
-            mChannel.setLightColor(Color.BLUE);
-            mChannel.enableVibration(true);
-            mChannel.setShowBadge(true);
-            mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
-            nm.createNotificationChannel(mChannel);
+        //a medium level channel
+        mChannel = new NotificationChannel(id2,
+            getString(R.string.channel_name2),  //name of the channel
+            NotificationManager.IMPORTANCE_LOW);   //importance level
+        // Configure the notification channel.
+        mChannel.setDescription(getString(R.string.channel_description2));
+        mChannel.enableLights(true);
+        // Sets the notification light color for notifications posted to this channel, if the device supports this feature.
+        mChannel.setLightColor(Color.BLUE);
+        mChannel.enableVibration(true);
+        mChannel.setShowBadge(true);
+        mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+        nm.createNotificationChannel(mChannel);
 
-            //a urgent level channel
-            mChannel = new NotificationChannel(id3,
-                getString(R.string.channel_name2),  //name of the channel
-                NotificationManager.IMPORTANCE_HIGH);   //importance level
-            // Configure the notification channel.
-            mChannel.setDescription(getString(R.string.channel_description3));
-            mChannel.enableLights(true);
-            // Sets the notification light color for notifications posted to this channel, if the device supports this feature.
-            mChannel.setLightColor(Color.GREEN);
-            mChannel.enableVibration(true);
-            mChannel.setShowBadge(true);
-            mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
-            nm.createNotificationChannel(mChannel);
-        }
+        //a urgent level channel
+        mChannel = new NotificationChannel(id3,
+            getString(R.string.channel_name2),  //name of the channel
+            NotificationManager.IMPORTANCE_HIGH);   //importance level
+        // Configure the notification channel.
+        mChannel.setDescription(getString(R.string.channel_description3));
+        mChannel.enableLights(true);
+        // Sets the notification light color for notifications posted to this channel, if the device supports this feature.
+        mChannel.setLightColor(Color.GREEN);
+        mChannel.enableVibration(true);
+        mChannel.setShowBadge(true);
+        mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+        nm.createNotificationChannel(mChannel);
     }
 
-
-    /*
+    /**
      * create a notification with a icon and message, plus a title.
      */
     public void simplenoti() {
@@ -231,9 +224,6 @@ public class MainActivity extends AppCompatActivity {
      * 4 other
      */
     public void extras(int which) {
-        /*
-         * Changing this to a builder, instead of notification, so some things can be set separately.
-         */
         String msg = "";
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), id1)
@@ -245,7 +235,10 @@ public class MainActivity extends AppCompatActivity {
             .setContentText("Hello World!")
             .setChannelId(id1);
 
-
+        /*
+         * Note, since the channel now provides the defaults for sound, vibrate, lights, this section really
+         * matter, since it's overridden by the channel settings
+         */
         switch (which) {
             case 1:  //sound
                 msg = "Sounds only";
@@ -279,6 +272,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setContentText(msg);
 
         Notification noti = builder.build();
+        //This will still work even if the channel is set differently.
         if (which == 4) {  //really annoy the user!
             noti.flags = Notification.FLAG_INSISTENT;
         }
@@ -289,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
         NotID++;
     }
 
-    /*
+    /**
      * create a notification with extra buttons.
      * Note, that the intents each ahve the own number, otherwise, they are did the same thing.
      *   something about android conserving memory, since the won't numbered differently.
@@ -341,6 +335,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Create a notification with extra text option.
+     */
     public void expandtext() {
         //Set the activity to be launch when selected
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
@@ -371,6 +368,9 @@ public class MainActivity extends AppCompatActivity {
         NotID++;
     }
 
+    /**
+     * Create a notification with mostly a picture, could have buttons too.
+     */
     public void expandimage() {
         //Set the activity to be launch when selected
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
@@ -401,7 +401,9 @@ public class MainActivity extends AppCompatActivity {
         nm.notify(NotID, noti);
         NotID++;
     }
-
+    /**
+     * Create a notification that looks more like a email/inbox notification.
+     */
     public void expandinbox() {
         //Set the activity to be launch when selected
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
@@ -439,6 +441,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * This creates a "notification" to happen later.  Actually sets the alarm alarm to wake up
+     * this code in 2 minutes and set a notification then.
+     */
     public void notlater() {
 
         //---use the AlarmManager to trigger an alarm---
@@ -466,9 +472,9 @@ public class MainActivity extends AppCompatActivity {
         NotID++;
     }
 
-
-    //creates a notification for lollipop with a popup/heads up message..
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    /**
+     * Create a popup notification.
+     */
     public void and5_notificaiton() {
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.putExtra("mytype", "iconmsg" + NotID);
