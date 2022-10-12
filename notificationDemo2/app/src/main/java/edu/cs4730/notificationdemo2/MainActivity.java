@@ -2,17 +2,25 @@ package edu.cs4730.notificationdemo2;
 
 
 import java.util.Calendar;
+import java.util.Map;
 
+import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.app.NotificationCompat;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import android.util.Log;
 import android.view.View;
@@ -31,12 +39,34 @@ public class MainActivity extends AppCompatActivity {
     NotificationManager nm;
     int NotID = 1;
     final String TAG = "MainActivity";
+    ActivityResultLauncher<String[]> rpl;
+    private final String[] REQUIRED_PERMISSIONS = new String[]{Manifest.permission.POST_NOTIFICATIONS};
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // for notifications permission now required in api 33
+        //this allows us to check with multiple permissions, but in this case (currently) only need 1.
+        rpl = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(),
+            new ActivityResultCallback<Map<String, Boolean>>() {
+                @Override
+                public void onActivityResult(Map<String, Boolean> isGranted) {
+                    boolean granted = true;
+                    for (Map.Entry<String, Boolean> x : isGranted.entrySet()) {
+                        logthis(x.getKey() + " is " + x.getValue());
+                        if (!x.getValue()) granted = false;
+                    }
+                    if (granted)
+                        logthis("Permissions granted for api 33+");
+                }
+            }
+        );
+
+
 
         findViewById(R.id.button1).setOnClickListener(new OnClickListener() {
             @Override
@@ -95,6 +125,25 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         createchannel();
+        //for the new api 33+ notifications permissions.
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (!allPermissionsGranted()) {
+                rpl.launch(REQUIRED_PERMISSIONS);
+            }
+        }
+    }
+
+    public void logthis(String msg) {
+        Log.d(TAG, msg);
+    }
+    //ask for permissions when we start.
+    private boolean allPermissionsGranted() {
+        for (String permission : REQUIRED_PERMISSIONS) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /*
@@ -147,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
                             // Sleep for 2 seconds
                             Thread.sleep(2 * 1000);
                         } catch (InterruptedException e) {
-                            Log.d(TAG, "sleep failure");
+                           logthis("sleep failure");
                         }
                     }
                     // When the loop is finished, updates the notification
@@ -192,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
                             // Sleep for 2 seconds
                             Thread.sleep(2 * 1000);
                         } catch (InterruptedException e) {
-                            Log.d(TAG, "sleep failure");
+                            logthis( "sleep failure");
                         }
                     }
                     // When the loop is finished, updates the notification

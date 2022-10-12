@@ -1,9 +1,13 @@
 package edu.cs4730.notificationdemo;
 
 import java.util.Calendar;
+import java.util.Map;
 
+import android.Manifest;
 import android.app.NotificationChannel;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -16,8 +20,12 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
 
 /**
@@ -34,12 +42,34 @@ public class MainActivity extends AppCompatActivity {
     public static String id3 = "test_channel_03";
     NotificationManager nm;
     int NotID = 1;
+    ActivityResultLauncher<String[]> rpl;
+    private final String[] REQUIRED_PERMISSIONS = new String[]{Manifest.permission.POST_NOTIFICATIONS};
+    public static String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // for notifications permission now required in api 33
+        //this allows us to check with multiple permissions, but in this case (currently) only need 1.
+        rpl = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(),
+            new ActivityResultCallback<Map<String, Boolean>>() {
+                @Override
+                public void onActivityResult(Map<String, Boolean> isGranted) {
+                    boolean granted = true;
+                    for (Map.Entry<String, Boolean> x : isGranted.entrySet()) {
+                        logthis(x.getKey() + " is " + x.getValue());
+                        if (!x.getValue()) granted = false;
+                    }
+                    if (granted)
+                        logthis("Permissions granted for api 33+");
+                }
+            }
+        );
+
+
 
         //call a new activity so we can play with a broadcast receiver.
         findViewById(R.id.btn_mbc).setOnClickListener(new OnClickListener() {
@@ -141,6 +171,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         createchannel();
+        //for the new api 33+ notifications permissions.
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (!allPermissionsGranted()) {
+                rpl.launch(REQUIRED_PERMISSIONS);
+            }
+        }
     }
 
     /**
@@ -188,6 +224,17 @@ public class MainActivity extends AppCompatActivity {
         mChannel.setShowBadge(true);
         mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
         nm.createNotificationChannel(mChannel);
+    }
+
+
+    //ask for permissions when we start.
+    private boolean allPermissionsGranted() {
+        for (String permission : REQUIRED_PERMISSIONS) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -497,6 +544,12 @@ public class MainActivity extends AppCompatActivity {
         //Show the notification
         nm.notify(NotID, noti);
         NotID++;
+    }
+
+
+    public void logthis(String msg) {
+
+        Log.d(TAG, msg);
     }
 
 }

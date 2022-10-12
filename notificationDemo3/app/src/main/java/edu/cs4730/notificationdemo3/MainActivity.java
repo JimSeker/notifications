@@ -1,5 +1,6 @@
 package edu.cs4730.notificationdemo3;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -9,18 +10,26 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.Map;
+
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.app.Person;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.app.RemoteInput;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 /**
  * while most of the work of creating the notifications is in the fragment, we need to create
@@ -50,11 +59,32 @@ public class MainActivity extends AppCompatActivity {
     TextView mNumberOfNotifications, logger;
 
     int NotificationNum = 1;
+    ActivityResultLauncher<String[]> rpl;
+    private final String[] REQUIRED_PERMISSIONS = new String[]{Manifest.permission.POST_NOTIFICATIONS};
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // for notifications permission now required in api 33
+        //this allows us to check with multiple permissions, but in this case (currently) only need 1.
+        rpl = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(),
+            new ActivityResultCallback<Map<String, Boolean>>() {
+                @Override
+                public void onActivityResult(Map<String, Boolean> isGranted) {
+                    boolean granted = true;
+                    for (Map.Entry<String, Boolean> x : isGranted.entrySet()) {
+                        logthis(x.getKey() + " is " + x.getValue());
+                        if (!x.getValue()) granted = false;
+                    }
+                    if (granted)
+                        logthis("Permissions granted for api 33+");
+                }
+            }
+        );
+
 
         logger = findViewById(R.id.logger);
 
@@ -76,6 +106,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         createchannel();  //setup channels if needed.
+        //for the new api 33+ notifications permissions.
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (!allPermissionsGranted()) {
+                rpl.launch(REQUIRED_PERMISSIONS);
+            }
+        }
     }
 
 
@@ -191,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
             )
             .addAction(actionReplyByRemoteInput);
 
-        logger.append("Sending notification " + NotificationNum + "\n");
+        logthis("Sending notification " + NotificationNum + "\n");
 
         mNotificationManagerCompat.notify(NotificationNum, builder.build());
         NotificationNum++;
@@ -204,14 +240,15 @@ public class MainActivity extends AppCompatActivity {
      * helper method that the mainactivity can call, to update the logger that a message has been read.
      */
     public void NotificationRead(int id) {
-        logger.append("Notification " + id + "has been read\n");
+        logthis("Notification " + id + "has been read\n");
     }
+
 
     /*
      * helper method that the mainactivity can use to update the logger with the reply to notification.
      */
     public void NotificationReply(int id, String message) {
-        logger.append("Notification " + id + ": reply is " + message + "\n");
+        logthis("Notification " + id + ": reply is " + message + "\n");
     }
 
 
@@ -287,5 +324,19 @@ public class MainActivity extends AppCompatActivity {
         mChannel.setShowBadge(true);
         mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
         nm.createNotificationChannel(mChannel);
+    }
+
+    //ask for permissions when we start.
+    private boolean allPermissionsGranted() {
+        for (String permission : REQUIRED_PERMISSIONS) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
+    }
+    public void logthis(String msg) {
+        logger.append(msg);
+        Log.d(TAG, msg);
     }
 }
