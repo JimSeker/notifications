@@ -247,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
         //Create a new notification. The construction Notification(int icon, CharSequence tickerText, long when) is deprecated.
         //If you target API level 11 or above, use Notification.Builder instead
         //With the second parameter, it would show a marquee
-        Notification noti = new NotificationCompat.Builder(getApplicationContext(), id1)
+        Notification noti = new NotificationCompat.Builder(getApplicationContext(), id2)
             .setSmallIcon(R.drawable.ic_announcement_black_24dp)
             //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
             .setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
