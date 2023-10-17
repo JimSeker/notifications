@@ -12,27 +12,31 @@ import android.view.View.OnClickListener;
 import androidx.core.app.NotificationCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
+import edu.cs4730.notificationdemo.databinding.ActivityBroadcastBinding;
+
 public class BroadCastRDemo extends AppCompatActivity {
     //"edu.cs4730.notificationdemo.broadNotification"
 
     NotificationManager nm;
     int NotID = 1;
+    ActivityBroadcastBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_broadcast);
+        binding = ActivityBroadcastBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
 
-        findViewById(R.id.btn_bc).setOnClickListener(new OnClickListener() {
+        binding.btnBc.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 viaBroadcast();
             }
         });
 
-        findViewById(R.id.btn_notibc).setOnClickListener(new OnClickListener() {
+        binding.btnNotibc.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 Noti2broadcast();

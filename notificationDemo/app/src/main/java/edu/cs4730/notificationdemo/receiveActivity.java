@@ -1,9 +1,10 @@
 package edu.cs4730.notificationdemo;
 
 import android.os.Bundle;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import edu.cs4730.notificationdemo.databinding.ActivityReceiveBinding;
 
 /**
  * This is the activity that the notification calls.
@@ -19,14 +20,15 @@ import androidx.appcompat.app.AppCompatActivity;
  */
 
 public class receiveActivity extends AppCompatActivity {
-    TextView Logger;
+    ActivityReceiveBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_receive);
+        binding = ActivityReceiveBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
         String info = "Nothing";
-        Logger = findViewById(R.id.logger);
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             info = extras.getString("mytype");
@@ -34,6 +36,6 @@ public class receiveActivity extends AppCompatActivity {
                 info = "nothing 2";
             }
         }
-        Logger.setText(info);
+        binding.logger.setText(info);
     }
 }

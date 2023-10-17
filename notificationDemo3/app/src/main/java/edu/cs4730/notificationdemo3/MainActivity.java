@@ -17,7 +17,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 import java.util.Map;
 
@@ -30,6 +29,8 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.app.RemoteInput;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+
+import edu.cs4730.notificationdemo3.databinding.ActivityMainBinding;
 
 /**
  * while most of the work of creating the notifications is in the fragment, we need to create
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     public PendingIntent mDeletePendingIntent;
     private static final int REQUEST_CODE = 2323;
 
-    TextView mNumberOfNotifications, logger;
+    ActivityMainBinding binding;
 
     int NotificationNum = 1;
     ActivityResultLauncher<String[]> rpl;
@@ -66,27 +67,25 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         // for notifications permission now required in api 33
         //this allows us to check with multiple permissions, but in this case (currently) only need 1.
         rpl = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(),
-            new ActivityResultCallback<Map<String, Boolean>>() {
-                @Override
-                public void onActivityResult(Map<String, Boolean> isGranted) {
-                    boolean granted = true;
-                    for (Map.Entry<String, Boolean> x : isGranted.entrySet()) {
-                        logthis(x.getKey() + " is " + x.getValue());
-                        if (!x.getValue()) granted = false;
+                new ActivityResultCallback<Map<String, Boolean>>() {
+                    @Override
+                    public void onActivityResult(Map<String, Boolean> isGranted) {
+                        boolean granted = true;
+                        for (Map.Entry<String, Boolean> x : isGranted.entrySet()) {
+                            logthis(x.getKey() + " is " + x.getValue());
+                            if (!x.getValue()) granted = false;
+                        }
+                        if (granted)
+                            logthis("Permissions granted for api 33+");
                     }
-                    if (granted)
-                        logthis("Permissions granted for api 33+");
                 }
-            }
         );
-
-
-        logger = findViewById(R.id.logger);
 
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         //to send notifications and everything else.
@@ -96,10 +95,8 @@ public class MainActivity extends AppCompatActivity {
         Intent deleteIntent = new Intent(MainActivity.ACTION_NOTIFICATION_DELETE);
         mDeletePendingIntent = PendingIntent.getBroadcast(this, REQUEST_CODE, deleteIntent, PendingIntent.FLAG_IMMUTABLE);
 
-        mNumberOfNotifications = findViewById(R.id.numNoti);
-
         // Supply actions to the button that is displayed on screen.
-        findViewById(R.id.addbutton).setOnClickListener(new View.OnClickListener() {
+        binding.addbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 createNotification();
@@ -143,24 +140,24 @@ public class MainActivity extends AppCompatActivity {
         //get getting length, but getActiveNotifications() return an array of the notifications, which you can find out the info about the notifications.
         int numberOfNotifications = mNotificationManager.getActiveNotifications().length;
 
-        mNumberOfNotifications.setText("Number of Active notifications is: " + numberOfNotifications);
+        binding.numNoti.setText("Number of Active notifications is: " + numberOfNotifications);
         Log.i(TAG, "Number of Active notifications is: " + numberOfNotifications);
     }
 
     // Creates an intent that will be triggered when a message is marked as read.
     private Intent getMessageReadIntent(int id) {
         return new Intent()
-            .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-            .setAction(MainActivity.READ_ACTION)
-            .putExtra(MainActivity.CONVERSATION_ID, id);
+                .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+                .setAction(MainActivity.READ_ACTION)
+                .putExtra(MainActivity.CONVERSATION_ID, id);
     }
 
     // Creates an Intent that will be triggered when a voice reply is received.
     private Intent getMessageReplyIntent(int conversationId) {
         return new Intent()
-            .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-            .setAction(MainActivity.REPLY_ACTION)
-            .putExtra(MainActivity.CONVERSATION_ID, conversationId);
+                .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+                .setAction(MainActivity.REPLY_ACTION)
+                .putExtra(MainActivity.CONVERSATION_ID, conversationId);
     }
 
 
@@ -170,14 +167,14 @@ public class MainActivity extends AppCompatActivity {
         PendingIntent readPendingIntent;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             readPendingIntent = PendingIntent.getBroadcast(this,
-                NotificationNum,
-                getMessageReadIntent(NotificationNum),
-                PendingIntent.FLAG_MUTABLE);
+                    NotificationNum,
+                    getMessageReadIntent(NotificationNum),
+                    PendingIntent.FLAG_MUTABLE);
         } else {
             readPendingIntent = PendingIntent.getBroadcast(this,
-                NotificationNum,
-                getMessageReadIntent(NotificationNum),
-                PendingIntent.FLAG_UPDATE_CURRENT);
+                    NotificationNum,
+                    getMessageReadIntent(NotificationNum),
+                    PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
         // A choices list.
@@ -185,50 +182,52 @@ public class MainActivity extends AppCompatActivity {
         // Build a RemoteInput for receiving voice input in a Car Notification or text input on
         // devices that support text input (like devices on Android N and above).
         RemoteInput remoteInput = new RemoteInput.Builder(MainActivity.EXTRA_REMOTE_REPLY)
-            .setLabel("Reply")
-            .setChoices(choices)
-            .build();
+                .setLabel("Reply")
+                .setChoices(choices)
+                .build();
 
         // Building a Pending Intent for the reply action to trigger
         PendingIntent replyIntent;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             replyIntent = PendingIntent.getBroadcast(this,
-                NotificationNum,
-                getMessageReplyIntent(NotificationNum),
-                PendingIntent.FLAG_MUTABLE);
+                    NotificationNum,
+                    getMessageReplyIntent(NotificationNum),
+                    PendingIntent.FLAG_MUTABLE);
         } else {
             replyIntent = PendingIntent.getBroadcast(this,
-                NotificationNum,
-                getMessageReplyIntent(NotificationNum),
-                PendingIntent.FLAG_UPDATE_CURRENT);
+                    NotificationNum,
+                    getMessageReplyIntent(NotificationNum),
+                    PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
         // Build an Android N compatible Remote Input enabled action.
         NotificationCompat.Action actionReplyByRemoteInput = new NotificationCompat.Action.Builder(
-            R.mipmap.notification_icon, "Reply", replyIntent)
-            .addRemoteInput(remoteInput)
-            .build();
+                R.mipmap.notification_icon, "Reply", replyIntent)
+                .addRemoteInput(remoteInput)
+                .build();
 
         //Create a Person object, to use int he messagingStyle object below.
         Person sender = new Person.Builder()
-            .setName("Jim")
-            .build();
+                .setName("Jim")
+                .build();
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MainActivity.id)
-            .setSmallIcon(R.mipmap.notification_icon)
-            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.android_contact))
-            .setWhen(System.currentTimeMillis())
-            .setContentTitle("Jim ")
-            .setContentIntent(readPendingIntent)
-            .setDeleteIntent(mDeletePendingIntent)
-            .setChannelId(MainActivity.id)
-            .setStyle(new NotificationCompat.MessagingStyle(sender)
-                .addMessage("Are you working?", System.currentTimeMillis(), sender)
-            )
-            .addAction(actionReplyByRemoteInput);
+                .setSmallIcon(R.mipmap.notification_icon)
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.android_contact))
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle("Jim ")
+                .setContentIntent(readPendingIntent)
+                .setDeleteIntent(mDeletePendingIntent)
+                .setChannelId(MainActivity.id)
+                .setStyle(new NotificationCompat.MessagingStyle(sender)
+                        .addMessage("Are you working?", System.currentTimeMillis(), sender)
+                )
+                .addAction(actionReplyByRemoteInput);
 
         logthis("Sending notification " + NotificationNum + "\n");
 
+
+        //I do check in onCreate.  yes, it could be removed between then, but don't care.
         mNotificationManagerCompat.notify(NotificationNum, builder.build());
         NotificationNum++;
         //update the number of notifications.
@@ -254,6 +253,7 @@ public class MainActivity extends AppCompatActivity {
 
     //for when a message has been replied to.
     private BroadcastReceiver mReplyReceiver = new BroadcastReceiver() {
+        @SuppressLint("MissingPermission")
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "onReceiveReply");
@@ -275,6 +275,7 @@ public class MainActivity extends AppCompatActivity {
                         .setChannelId(MainActivity.id)
                         .setOnlyAlertOnce(true)  //don't sound/vibrate/lights again!
                         .build();
+                    //I do check in onCreate.  yes, it could be removed between then, but don't care.
                     notificationManager.notify(conversationId, repliedNotification);
                     NotificationReply(conversationId, replyMessage);
                 }
@@ -283,13 +284,21 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     @Override
     protected void onStart() {
         super.onStart();
-        registerReceiver(mDeleteReceiver, new IntentFilter(ACTION_NOTIFICATION_DELETE));
-        registerReceiver(mReadReceiver, new IntentFilter(READ_ACTION));
-        registerReceiver(mReplyReceiver, new IntentFilter(REPLY_ACTION));
+          if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+              registerReceiver(mDeleteReceiver, new IntentFilter(ACTION_NOTIFICATION_DELETE), Context.RECEIVER_NOT_EXPORTED);
+              registerReceiver(mReadReceiver, new IntentFilter(READ_ACTION), Context.RECEIVER_NOT_EXPORTED);
+              registerReceiver(mReplyReceiver, new IntentFilter(REPLY_ACTION), Context.RECEIVER_NOT_EXPORTED);
+          } else {
+
+              //lint can't see the if statement and is stupid.
+              registerReceiver(mDeleteReceiver, new IntentFilter(ACTION_NOTIFICATION_DELETE));
+              registerReceiver(mReadReceiver, new IntentFilter(READ_ACTION));
+              registerReceiver(mReplyReceiver, new IntentFilter(REPLY_ACTION));
+          }
     }
 
     @Override
@@ -336,7 +345,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
     public void logthis(String msg) {
-        logger.append(msg);
+        binding.logger.append(msg);
         Log.d(TAG, msg);
     }
 }
