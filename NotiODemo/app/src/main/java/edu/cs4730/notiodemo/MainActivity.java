@@ -22,12 +22,14 @@ import android.view.View;
 
 import java.util.Map;
 
+import edu.cs4730.notiodemo.databinding.ActivityMainBinding;
+
 
 /**
  * Very simple main to start the service that will then show create notifications for the O notification channels and icon dots.
  * <p>
  * Note for the badges (dots) to work, you need something like google launcher, where badges are supported
- *   also turned on, since they can be turned off in some launchers as well.
+ * also turned on, since they can be turned off in some launchers as well.
  */
 
 public class MainActivity extends AppCompatActivity {
@@ -39,12 +41,13 @@ public class MainActivity extends AppCompatActivity {
     ActivityResultLauncher<String[]> rpl;
     private final String[] REQUIRED_PERMISSIONS = new String[]{Manifest.permission.POST_NOTIFICATIONS};
     String TAG = "MainActivity";
+    ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         // for notifications permission now required in api 33
         //this allows us to check with multiple permissions, but in this case (currently) only need 1.
@@ -63,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
             }
         );
 
-        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
+        binding.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent number5 = new Intent(getBaseContext(), MyNotiService.class);
@@ -71,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
                 startService(number5);
             }
         });
-        findViewById(R.id.button2).setOnClickListener(new View.OnClickListener() {
+        binding.button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 makenoti("hi there", 1);
@@ -136,8 +139,9 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+
     public void logthis(String msg) {
-     //   logger.append(msg);
+        //   logger.append(msg);
         Log.d(TAG, msg);
     }
 
