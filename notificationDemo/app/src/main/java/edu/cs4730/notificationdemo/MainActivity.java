@@ -194,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
         mChannel.setShowBadge(true);
         mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
         nm.createNotificationChannel(mChannel);
-
+        //NotificationManager.IMPORTANCE_MAX
         //a medium level channel
         mChannel = new NotificationChannel(id2, getString(R.string.channel_name2),  //name of the channel
                 NotificationManager.IMPORTANCE_LOW);   //importance level
@@ -237,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
      * create a notification with a icon and message, plus a title.
      */
     public void simplenoti() {
+        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.putExtra("mytype", "simple" + NotID); //not required, but used in this example.
         PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
@@ -274,7 +275,8 @@ public class MainActivity extends AppCompatActivity {
 
         /*
          * Note, since the channel now provides the defaults for sound, vibrate, lights, this section really
-         * matter, since it's overridden by the channel settings
+         * matter, since it's overridden by the channel settings, these settings make no difference anymore.
+         * except for FLAG_INSISTENT setting at the bottom, which is also lights.
          */
         switch (which) {
             case 1:  //sound

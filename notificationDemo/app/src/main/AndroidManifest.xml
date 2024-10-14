@@ -60,7 +60,8 @@
         <receiver
             android:name=".myBroadcastReceiver"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:permission="android.permission.BIND_NOTIFICATION">
             <intent-filter>
                 <action android:name="edu.cs4730.notificationdemo.broadNotification" />
             </intent-filter>
