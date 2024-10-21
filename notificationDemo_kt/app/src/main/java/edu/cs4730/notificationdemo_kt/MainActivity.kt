@@ -14,11 +14,14 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import edu.cs4730.notificationdemo_kt.databinding.ActivityMainBinding
 import java.util.Calendar
 
@@ -51,6 +54,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.getRoot())
+        ViewCompat.setOnApplyWindowInsetsListener(
+            findViewById(binding.main.id)
+        ) { v: View, insets: WindowInsetsCompat ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+
+
         nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         rpl = registerForActivityResult<Array<String>, Map<String, Boolean>>(
             ActivityResultContracts.RequestMultiplePermissions()
