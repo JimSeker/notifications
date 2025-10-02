@@ -7,7 +7,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -39,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         const val id2 = "test_channel_02"
         const val id3 = "test_channel_03"
         const val TAG = "MainActivity"
-        const val ACTION = "edu.cs4730.notificationdemo.broadNotification"
+        const val ACTION = "edu.cs4730.notificationdemo_kt.broadNotification"
     }
 
     private lateinit var nm: NotificationManager
@@ -55,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.getRoot())
         ViewCompat.setOnApplyWindowInsetsListener(
-            findViewById(binding.main.id)
+            binding.main
         ) { v: View, insets: WindowInsetsCompat ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -75,37 +74,42 @@ class MainActivity : AppCompatActivity() {
             if (granted) logthis("Permissions granted for api 33+")
         }
 
-        //call a new activity so we can play with a broadcast receiver.
-
 
         //call a new activity so we can play with a broadcast receiver.
         binding.btnMbc.setOnClickListener {
             startActivity(
                 Intent(
-                    applicationContext, BroadCastRDemo::class.java
+                    applicationContext,
+                    BroadCastRDemo::class.java
                 )
             )
         }
+
+
         //Icon and message icon
         binding.btnIconMarquee.setOnClickListener { simplenoti() }
-        //With Sounds, maybe not work in emulator
-        binding.btnSound.setOnClickListener { extras(1) }
-        //With Vibrate (doesn't work in emulator)
-        binding.btnVibrate.setOnClickListener { extras(2) }
 
-        //With both sounds and vibrate, not going to work in emulator
-        binding.btnBoth.setOnClickListener { extras(3) }
+        //With Sounds, maybe not work in emulator
+        binding.btnExtra.setOnClickListener { extras(1) }
+
         //With both sounds, vibrate, lights, not going to work in emulator
-        binding.btnLight.setOnClickListener { extras(4) }
+        binding.btnUrgent.setOnClickListener { extras(4) }
+
+        binding.btnPopup.setOnClickListener { popupNotification() }
+
 
         //Notification with Action buttons
         binding.btnActions.setOnClickListener { actionbuttons() }
+
         //With expanded text
         binding.btnExpandText.setOnClickListener { expandtext() }
+
         //With expanded text/image
         binding.btnExpandImage.setOnClickListener { expandimage() }
+
         //similar to inbox notifications
         binding.btnExpandInbox.setOnClickListener { expandinbox() }
+
         //similar to inbox notifications
         binding.btnCancel.setOnClickListener {
             //cancels and removed last notification programming, user doesn't remove it.
@@ -116,10 +120,6 @@ class MainActivity : AppCompatActivity() {
             //Remember use notify with the same ID number, it will just update notification
             //assuming the user hasn't removed it already.
         }
-        //notification 2 minutes in the future
-        binding.btnAlarm.setOnClickListener { notlater() }
-
-        binding.notiAnd5.setOnClickListener { and5_notificaiton() }
         createchannel()
         //for the new api 33+ notifications permissions.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -146,6 +146,13 @@ class MainActivity : AppCompatActivity() {
         mChannel.enableVibration(true)
         mChannel.setShowBadge(true)
         mChannel.setVibrationPattern(longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400))
+        mChannel.lockscreenVisibility =
+            Notification.VISIBILITY_PRIVATE //show this notification on the lock screen, but hide sensitive info.
+        //To set sound, use the following code, but note, the user can always change the sound.
+        //mChannel.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),null);
+        //For you own sound in your package
+        //mChannel.setSound(Uri.parse("android.resource://com.my.package/" + R.raw.sound), null);
+
         nm.createNotificationChannel(mChannel)
 
         //a medium level channel
@@ -165,7 +172,7 @@ class MainActivity : AppCompatActivity() {
 
         //a urgent level channel
         mChannel = NotificationChannel(
-            Actions.id3, getString(R.string.channel_name2),  //name of the channel
+            Actions.id3, getString(R.string.channel_name3),  //name of the channel
             NotificationManager.IMPORTANCE_HIGH
         ) //importance level
         // Configure the notification channel.
@@ -206,9 +213,7 @@ class MainActivity : AppCompatActivity() {
         val contentIntent = PendingIntent.getActivity(
             this@MainActivity, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE
         )
-        //Create a new notification. The construction Notification(int icon, CharSequence tickerText, long when) is deprecated.
-        //If you target API level 11 or above, use Notification.Builder instead
-        //With the second parameter, it would show a marquee
+        //Create a new notification.
         val noti: Notification = NotificationCompat.Builder(applicationContext, Actions.id2)
             .setSmallIcon(R.drawable.ic_announcement_black_24dp) //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
             .setWhen(System.currentTimeMillis()) //When the event occurred, now, since noti are stored by time.
@@ -225,13 +230,11 @@ class MainActivity : AppCompatActivity() {
 
     /*
      * sets different types of flags
-     * 1 sounds
-     * 2 vibrate
-     * 3 both
-     * 4 other
+     * 1 to 3 are now set in the channel, so changing them here does nothing.
+     * 4 ugrent
      */
     private fun extras(which: Int) {
-        var msg = ""
+        var msg = "Nothing extra"
         val builder: NotificationCompat.Builder =
             NotificationCompat.Builder(applicationContext, Actions.id1)
                 .setSmallIcon(R.mipmap.ic_launcher).setContentTitle("My notification").setWhen(
@@ -240,28 +243,16 @@ class MainActivity : AppCompatActivity() {
                 .setAutoCancel(true) //allow auto cancel when pressed.
                 .setContentTitle("With Extras") //Title message top row.
                 .setContentText("Hello World!").setChannelId(Actions.id1)
-        when (which) {
-            1 -> {
-                msg = "Sounds only"
-                builder.setDefaults(Notification.DEFAULT_SOUND)
-            }
 
-            2 -> {
-                //NOTE, Need the <uses-permission android:name="android.permission.VIBRATE"></uses-permission> in manifest or force Close
-                msg = "Vibrate"
-                builder.setDefaults(Notification.DEFAULT_VIBRATE)
-            }
 
-            3 -> {
-                msg = "Both sound and vibrate"
-                builder.setDefaults(Notification.DEFAULT_VIBRATE or Notification.DEFAULT_SOUND)
-            }
+        /*
+         * Note, since the channel now provides the defaults for sound, vibrate, lights, this section really
+         * matter, since it's overridden by the channel settings, these settings make no difference anymore.
+         * except for FLAG_INSISTENT setting at the bottom, which is also lights.
+         */
+        if (which == 4) msg = "Urgent, sound, vibrate and lights"
 
-            4 -> {
-                msg = "and Lights"
-                builder.setDefaults(Notification.DEFAULT_LIGHTS or Notification.DEFAULT_VIBRATE or Notification.DEFAULT_SOUND)
-            }
-        }
+
         val notificationIntent = Intent(
             applicationContext, receiveActivity::class.java
         )
@@ -282,6 +273,38 @@ class MainActivity : AppCompatActivity() {
         nm.notify(NotID, noti)
         NotID++
     }
+
+    /**
+     * Create a popup notification.
+     */
+    private fun popupNotification() {
+        val notificationIntent = Intent(
+            applicationContext, receiveActivity::class.java
+        )
+        notificationIntent.putExtra("mytype", "iconmsg$NotID")
+        val contentIntent = PendingIntent.getActivity(
+            this@MainActivity, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE
+        )
+        val noti: Notification = NotificationCompat.Builder(
+            applicationContext, Actions.id3
+        ) //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setWhen(System.currentTimeMillis()) //When the event occurred, now, since noti are stored by time.
+            .setContentTitle("Popup notification") //Title message top row.
+            .setContentText("This should be a heads up message.") //message when looking at the notification, second row
+            //This is set in the channel now and the user can change, so the popup may not happen.
+            // .setPriority(NotificationManager.IMPORTANCE_HIGH) //could also be PRIORITY_HIGH.  needed for LOLLIPOP, M and N.  But not Oreo
+            // .setVibrate(longArrayOf(1000, 1000, 1000, 1000, 1000)) //for the heads/pop up must have sound or vibrate
+            .setContentIntent(contentIntent) //what activity to open.
+            .setAutoCancel(true) //allow auto cancel when pressed.
+            .setChannelId(Actions.id3) //Oreo notifications
+            .build() //finally build and return a Notification.
+
+        //Show the notification
+        nm.notify(NotID, noti)
+        NotID++
+    }
+
 
     /**
      * create a notification with extra buttons.
@@ -331,9 +354,8 @@ class MainActivity : AppCompatActivity() {
         val noti: Notification = NotificationCompat.Builder(applicationContext, Actions.id1)
             .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
             .setSmallIcon(R.drawable.ic_announcement_black_24dp)
-            .setTicker("This is a notification marquee").setWhen(
-                System.currentTimeMillis()
-            ).setContentTitle("Action Buttons").setContentText("has 3 different action buttons")
+            .setWhen(System.currentTimeMillis())
+            .setContentTitle("Action Buttons").setContentText("has 3 different action buttons")
             .setContentIntent(contentIntent) //At most three action buttons can be added
             .addAction(android.R.drawable.ic_menu_camera, "Action 1", contentIntent1)
             .addAction(android.R.drawable.ic_menu_compass, "Action 2", contentIntent2)
@@ -363,9 +385,8 @@ class MainActivity : AppCompatActivity() {
             NotificationCompat.Builder(applicationContext, Actions.id1)
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
                 .setSmallIcon(R.drawable.ic_announcement_black_24dp)
-                .setTicker("This is a notification marquee").setWhen(
-                    System.currentTimeMillis()
-                ).setContentTitle("Message Title 7")
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle("Message Title 7")
                 .setContentText("Message Content 7 will have more space for text")
                 .setContentIntent(contentIntent) //At most three action buttons can be added (Optional)
                 .addAction(
@@ -401,9 +422,8 @@ class MainActivity : AppCompatActivity() {
             NotificationCompat.Builder(applicationContext, Actions.id1)
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
                 .setSmallIcon(R.drawable.ic_announcement_black_24dp)
-                .setTicker("This is a notification marquee").setWhen(
-                    System.currentTimeMillis()
-                ).setContentTitle("Message Title 8")
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle("Message Title 8")
                 .setContentText("Message Content 8 will have a large image")
                 .setContentIntent(contentIntent) //At most three action buttons can be added (Optional)
                 .addAction(
@@ -441,9 +461,8 @@ class MainActivity : AppCompatActivity() {
             NotificationCompat.Builder(applicationContext, Actions.id1)
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
                 .setSmallIcon(R.drawable.ic_announcement_black_24dp)
-                .setTicker("This is a notification marquee").setWhen(
-                    System.currentTimeMillis()
-                ).setContentTitle("Message Title 9").setContentText("You have many emails")
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle("Message Title 9").setContentText("You have many emails")
                 .setContentIntent(contentIntent).setChannelId(Actions.id1).setAutoCancel(true)
 
         //Set up the notification
@@ -458,75 +477,6 @@ class MainActivity : AppCompatActivity() {
         nm.notify(NotID, noti)
         NotID++
     }
-
-    /**
-     * This creates a "notification" to happen later.  Actually sets the alarm alarm to wake up
-     * this code in 2 minutes and set a notification then.
-     */
-    private fun notlater() {
-
-        //---use the AlarmManager to trigger an alarm---
-        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
-
-        //---get current date and time---
-        val calendar = Calendar.getInstance()
-
-        //---sets the time for the alarm to trigger in 2 minutes from now---
-        calendar[Calendar.MINUTE] = calendar[Calendar.MINUTE] + 2
-        calendar[Calendar.SECOND] = 0
-
-        //---PendingIntent to launch activity when the alarm triggers-
-
-        //Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
-        val notificationIntent = Intent("edu.cs4730.notificationdemo.DisplayNotification")
-        notificationIntent.putExtra("NotifID", NotID)
-        val contentIntent = PendingIntent.getActivity(
-            this@MainActivity, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE
-        )
-        Log.i("MainACtivity", "Set alarm, I hope")
-
-
-        //---sets the alarm to trigger---
-        alarmManager[AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis()] = contentIntent
-        NotID++
-    }
-
-    /**
-     * Create a popup notification.
-     */
-    private fun and5_notificaiton() {
-        val notificationIntent = Intent(
-            applicationContext, receiveActivity::class.java
-        )
-        notificationIntent.putExtra("mytype", "iconmsg$NotID")
-        val contentIntent = PendingIntent.getActivity(
-            this@MainActivity, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE
-        )
-        val noti: Notification = NotificationCompat.Builder(
-            applicationContext, Actions.id3
-        ) //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setWhen(System.currentTimeMillis()) //When the event occurred, now, since noti are stored by time.
-            .setContentTitle("Lollipop notificaiton") //Title message top row.
-            .setContentText("This should be an annoying heads up message.") //message when looking at the notification, second row
-            //the following 2 lines cause it to show up as popup message at the top in android 5 systems.
-            .setPriority(NotificationManager.IMPORTANCE_HIGH) //could also be PRIORITY_HIGH.  needed for LOLLIPOP, M and N.  But not Oreo
-            .setVibrate(
-                longArrayOf(
-                    1000, 1000, 1000, 1000, 1000
-                )
-            ) //for the heads/pop up must have sound or vibrate
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC) //VISIBILITY_PRIVATE or VISIBILITY_SECRET
-            .setContentIntent(contentIntent) //what activity to open.
-            .setAutoCancel(true) //allow auto cancel when pressed.
-            .setChannelId(Actions.id3) //Oreo notifications
-            .build() //finally build and return a Notification.
-
-        //Show the notification
-        nm.notify(NotID, noti)
-        NotID++
-    }
-
 
     private fun logthis(msg: String) {
         Log.d(Actions.TAG, msg)

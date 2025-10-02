@@ -24,7 +24,7 @@ class myBroadcastReceiver : BroadcastReceiver() {
                     info = "nothing"
                 }
             }
-            Toast.makeText(context, "intent has: $info", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "intent has KT: $info", Toast.LENGTH_SHORT).show()
             Log.i("myBroadcastReceiver", "intent has: $info")
         }
     }

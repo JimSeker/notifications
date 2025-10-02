@@ -1,12 +1,14 @@
 [versions]
-agp = "8.7.1"
-kotlin = "1.9.25"
-coreKtx = "1.13.1"
-appcompat = "1.7.0"
-activity = "1.9.2"
+agp = "8.13.0"
+constraintlayout = "2.2.1"
+kotlin = "2.2.20"
+coreKtx = "1.17.0"
+appcompat = "1.7.1"
+activity = "1.11.0"
 
 
 [libraries]
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }

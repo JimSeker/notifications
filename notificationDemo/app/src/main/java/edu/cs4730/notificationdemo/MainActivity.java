@@ -1,15 +1,15 @@
 package edu.cs4730.notificationdemo;
 
-import java.util.Calendar;
 import java.util.Map;
 
 import android.Manifest;
 import android.app.NotificationChannel;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -34,6 +34,7 @@ import edu.cs4730.notificationdemo.databinding.ActivityMainBinding;
 
 /**
  * This one of two notification demos.  The second one uses the broadcast receiver located in this app.
+ * Need the <uses-permission android:name="android.permission.VIBRATE"/> in manifest or force Close
  * <p>
  * This maybe helpful.
  * https://developer.android.com/training/notify-user/build-notification.html
@@ -85,6 +86,8 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(getApplicationContext(), BroadCastRDemo.class));
             }
         });
+
+
         //Icon and message icon
         binding.btnIconMarquee.setOnClickListener(new OnClickListener() {
             @Override
@@ -93,34 +96,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         //With Sounds, maybe not work in emulator
-        binding.btnSound.setOnClickListener(new OnClickListener() {
+        binding.btnExtra.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 extras(1);
             }
         });
-        //With Vibrate (doesn't work in emulator)
-        binding.btnVibrate.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                extras(2);
-            }
-        });
-        //With both sounds and vibrate, not going to work in emulator
-        binding.btnBoth.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                extras(3);
-            }
-        });
-
         //With both sounds, vibrate, lights, not going to work in emulator
-        binding.btnLight.setOnClickListener(new OnClickListener() {
+        binding.btnUrgent.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 extras(4);
             }
         });
+
+        binding.btnPopup.setOnClickListener(new OnClickListener() {
+            //create a android 5/lollipop notification popup.
+            @Override
+            public void onClick(View view) {
+                popupNotification();
+            }
+        });
+
         //Notification with Action buttons
         binding.btnActions.setOnClickListener(new OnClickListener() {
             @Override
@@ -162,21 +159,8 @@ public class MainActivity extends AppCompatActivity {
                 //assuming the user hasn't removed it already.
             }
         });
-        //notification 2 minutes in the future
-        binding.btnAlarm.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                notlater();
-            }
-        });
 
-        binding.notiAnd5.setOnClickListener(new OnClickListener() {
-            //create a android 5/lollipop notification popup.
-            @Override
-            public void onClick(View view) {
-                and5_notificaiton();
-            }
-        });
+
         createchannel();
         //for the new api 33+ notifications permissions.
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -191,8 +175,8 @@ public class MainActivity extends AppCompatActivity {
      */
     private void createchannel() {
         NotificationChannel mChannel = new NotificationChannel(id1, getString(R.string.channel_name),  //name of the channel
-                NotificationManager.IMPORTANCE_DEFAULT);   //importance level
-        //important level: default is is high on the phone.  high is urgent on the phone.  low is medium, so none is low?
+            NotificationManager.IMPORTANCE_DEFAULT);   //importance level
+        //important level: default is high on the phone.  high is urgent on the phone.  low is medium, so none is low?
         // Configure the notification channel.
         mChannel.setDescription(getString(R.string.channel_description));
         mChannel.enableLights(true);
@@ -201,11 +185,17 @@ public class MainActivity extends AppCompatActivity {
         mChannel.enableVibration(true);
         mChannel.setShowBadge(true);
         mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+        mChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE); //show this notification on the lock screen, but hide sensitive info.
+        //To set sound, use the following code, but note, the user can always change the sound.
+        //mChannel.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),null);
+        //For you own sound in your package
+        //mChannel.setSound(Uri.parse("android.resource://com.my.package/" + R.raw.sound), null);
         nm.createNotificationChannel(mChannel);
-        //NotificationManager.IMPORTANCE_MAX
+
+
         //a medium level channel
         mChannel = new NotificationChannel(id2, getString(R.string.channel_name2),  //name of the channel
-                NotificationManager.IMPORTANCE_LOW);   //importance level
+            NotificationManager.IMPORTANCE_LOW);   //importance level
         // Configure the notification channel.
         mChannel.setDescription(getString(R.string.channel_description2));
         mChannel.enableLights(true);
@@ -217,8 +207,8 @@ public class MainActivity extends AppCompatActivity {
         nm.createNotificationChannel(mChannel);
 
         //a urgent level channel
-        mChannel = new NotificationChannel(id3, getString(R.string.channel_name2),  //name of the channel
-                NotificationManager.IMPORTANCE_HIGH);   //importance level
+        mChannel = new NotificationChannel(id3, getString(R.string.channel_name3),  //name of the channel
+            NotificationManager.IMPORTANCE_HIGH);   //importance level, so popup notifications show.
         // Configure the notification channel.
         mChannel.setDescription(getString(R.string.channel_description3));
         mChannel.enableLights(true);
@@ -249,17 +239,15 @@ public class MainActivity extends AppCompatActivity {
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.putExtra("mytype", "simple" + NotID); //not required, but used in this example.
         PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
-        //Create a new notification. The construction Notification(int icon, CharSequence tickerText, long when) is deprecated.
-        //If you target API level 11 or above, use Notification.Builder instead
-        //With the second parameter, it would show a marquee
+        //Create a new notification.
         Notification noti = new NotificationCompat.Builder(getApplicationContext(), id2).setSmallIcon(R.drawable.ic_announcement_black_24dp)
-                //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
-                .setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
-                .setContentTitle("Marquee or Title")   //Title message top row.
-                .setContentText("Message, this has only a small icon.")  //message when looking at the notification, second row
-                .setContentIntent(contentIntent)  //what activity to open.
-                .setAutoCancel(true)   //allow auto cancel when pressed.
-                .setChannelId(id2).build();  //finally build and return a Notification.
+            //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+            .setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
+            .setContentTitle("Marquee or Title")   //Title message top row.
+            .setContentText("Message, this has only a small icon.")  //message when looking at the notification, second row
+            .setContentIntent(contentIntent)  //what activity to open.
+            .setAutoCancel(true)   //allow auto cancel when pressed.
+            .setChannelId(id2).build();  //finally build and return a Notification.
 
         //Show the notification
         nm.notify(NotID, noti);
@@ -268,49 +256,27 @@ public class MainActivity extends AppCompatActivity {
 
     /*
      * sets different types of flags
-     * 1 sounds
-     * 2 vibrate
-     * 3 both
-     * 4 other
+     * 1 to 3 are now set in the channel, so changing them here does nothing.
+     * 4 urgent
      */
     public void extras(int which) {
-        String msg = "";
+        String msg = "Nothing extra";
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), id1).setSmallIcon(R.drawable.ic_launcher).setContentTitle("My notification").setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
-                .setAutoCancel(true)   //allow auto cancel when pressed.
-                .setContentTitle("With Extras")   //Title message top row.
-                .setContentText("Hello World!").setChannelId(id1);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), id1)
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setContentTitle("My notification")
+            .setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
+            .setAutoCancel(true)   //allow auto cancel when pressed.
+            .setContentTitle("With Extras")   //Title message top row.
+            .setContentText("Hello World!").setChannelId(id1);
 
         /*
          * Note, since the channel now provides the defaults for sound, vibrate, lights, this section really
          * matter, since it's overridden by the channel settings, these settings make no difference anymore.
          * except for FLAG_INSISTENT setting at the bottom, which is also lights.
          */
-        switch (which) {
-            case 1:  //sound
-                msg = "Sounds only";
-                builder.setDefaults(Notification.DEFAULT_SOUND);
-                //or harder way
-                //builder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                //For you own sound in your package
-                //builder.setSound(Uri.parse("android.resource://com.my.package/" + R.raw.sound));
-                break;
-            case 2: //Vibrate
-                //NOTE, Need the <uses-permission android:name="android.permission.VIBRATE"></uses-permission> in manifest or force Close
-                msg = "Vibrate";
-                builder.setDefaults(Notification.DEFAULT_VIBRATE);
-                break;
-            case 3: //both
-                msg = "Both sound and vibrate";
-                builder.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND);
-                break;
-            case 4:
-                msg = "and Lights";
-                builder.setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND);
-                // Notification.DEFAULT_ALL  does the same thing.
-                break;
+        if (which == 4) msg = "Urgent, sound, vibrate and lights";
 
-        }
 
         Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
         notificationIntent.putExtra("mytype", msg);
@@ -324,11 +290,36 @@ public class MainActivity extends AppCompatActivity {
             noti.flags = Notification.FLAG_INSISTENT;
         }
 
+        //Show the notification
+        nm.notify(NotID, noti);
+        NotID++;
+    }
+
+    /**
+     * Create a popup notification.
+     */
+    public void popupNotification() {
+        Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
+        notificationIntent.putExtra("mytype", "iconmsg" + NotID);
+        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+        Notification noti = new NotificationCompat.Builder(getApplicationContext(), id3)
+            //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+            .setSmallIcon(R.drawable.ic_launcher).setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
+            .setContentTitle("popup notification")   //Title message top row.
+            .setContentText("This should be a heads up message.")  //message when looking at the notification, second row
+            //This is set in the channel now and the user can change, so the popup may not happen.
+            //.setPriority(NotificationManager.IMPORTANCE_HIGH)  //could also be PRIORITY_HIGH.
+            //.setVibrate(new long[]{1000, 1000, 1000, 1000, 1000})  //for the heads/pop up must have sound or vibrate
+            .setContentIntent(contentIntent)  //what activity to open.
+            .setAutoCancel(true)   //allow auto cancel when pressed.
+            .setChannelId(id3)  //Oreo notifications
+            .build();  //finally build and return a Notification.
 
         //Show the notification
         nm.notify(NotID, noti);
         NotID++;
     }
+
 
     /**
      * create a notification with extra buttons.
@@ -360,9 +351,16 @@ public class MainActivity extends AppCompatActivity {
         PendingIntent contentIntent3 = PendingIntent.getActivity(MainActivity.this, NotID + 3, notificationIntent3, PendingIntent.FLAG_IMMUTABLE);
 
         //Set up the notification
-        Notification noti = new NotificationCompat.Builder(getApplicationContext(), id1).setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher)).setSmallIcon(R.drawable.ic_announcement_black_24dp).setTicker("This is a notification marquee").setWhen(System.currentTimeMillis()).setContentTitle("Action Buttons").setContentText("has 3 different action buttons").setContentIntent(contentIntent)
-                //At most three action buttons can be added
-                .addAction(android.R.drawable.ic_menu_camera, "Action 1", contentIntent1).addAction(android.R.drawable.ic_menu_compass, "Action 2", contentIntent2).addAction(android.R.drawable.ic_menu_info_details, "Action 3", contentIntent3).setAutoCancel(true).setChannelId(id1).build();
+        Notification noti = new NotificationCompat.Builder(getApplicationContext(), id1)
+            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+            .setSmallIcon(R.drawable.ic_announcement_black_24dp)
+            .setWhen(System.currentTimeMillis())
+            .setContentTitle("Action Buttons")
+            .setContentText("has 3 different action buttons")
+            .setContentIntent(contentIntent)
+            .setChannelId(id1).setAutoCancel(true)
+            //At most three action buttons can be added
+            .addAction(android.R.drawable.ic_menu_camera, "Action 1", contentIntent1).addAction(android.R.drawable.ic_menu_compass, "Action 2", contentIntent2).addAction(android.R.drawable.ic_menu_info_details, "Action 3", contentIntent3).setAutoCancel(true).setChannelId(id1).build();
 
         //Show the notification
         nm.notify(NotID, noti);
@@ -380,10 +378,16 @@ public class MainActivity extends AppCompatActivity {
         PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
         //Makes the Notification Builder
-        NotificationCompat.Builder build = new NotificationCompat.Builder(getApplicationContext(), id1).setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher)).setSmallIcon(R.drawable.ic_announcement_black_24dp).setTicker("This is a notification marquee").setWhen(System.currentTimeMillis()).setContentTitle("Message Title 7").setContentText("Message Content 7 will have more space for text").setContentIntent(contentIntent)
-                //At most three action buttons can be added (Optional)
-                .addAction(android.R.drawable.ic_menu_edit, "Edit", contentIntent)  //Maybe a different intent here?  depends.
-                .setChannelId(id1).setAutoCancel(true);
+        NotificationCompat.Builder build = new NotificationCompat.Builder(getApplicationContext(), id1)
+            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+            .setSmallIcon(R.drawable.ic_announcement_black_24dp)
+            .setWhen(System.currentTimeMillis())
+            .setContentTitle("Message Title 7")
+            .setContentText("Message Content 7 will have more space for text")
+            .setContentIntent(contentIntent)
+            //At most three action buttons can be added (Optional)
+            .addAction(android.R.drawable.ic_menu_edit, "Edit", contentIntent)  //Maybe a different intent here?  depends.
+            .setChannelId(id1).setAutoCancel(true);
 
         //Set up the notification
         Notification noti = new NotificationCompat.BigTextStyle(build).bigText("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent consequat dictum sem. Aliquam lacus turpis, aliquet id dictum id, fringilla nec tortor. Sed consectetur eros vel lectus ornare a vulputate dui eleifend. Integer ac lorem ipsum, in placerat ligula. Mauris et dictum risus. Aliquam vestibulum nibh vitae nibh vehicula nec ullamcorper sapien feugiat. Proin vel porttitor diam. In laoreet eleifend ipsum eget lobortis. Suspendisse est magna, egestas non sodales ac, eleifend sit amet tellus.").build();
@@ -403,11 +407,15 @@ public class MainActivity extends AppCompatActivity {
         PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
         //Makes the Notification Builder
-        NotificationCompat.Builder build = new NotificationCompat.Builder(getApplicationContext(), id1).setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher)).setSmallIcon(R.drawable.ic_announcement_black_24dp).setTicker("This is a notification marquee").setWhen(System.currentTimeMillis()).setContentTitle("Message Title 8").setContentText("Message Content 8 will have a large image").setContentIntent(contentIntent)
-                //At most three action buttons can be added (Optional)
-                .addAction(android.R.drawable.ic_menu_edit, "Edit", contentIntent)   //should be a different intent here.
-                .addAction(android.R.drawable.ic_menu_share, "Share", contentIntent) //should be a different intent here.
-                .setChannelId(id1).setAutoCancel(true);
+        NotificationCompat.Builder build = new NotificationCompat.Builder(getApplicationContext(), id1)
+            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+            .setSmallIcon(R.drawable.ic_announcement_black_24dp)
+            .setWhen(System.currentTimeMillis())
+            .setContentTitle("Message Title 8").setContentText("Message Content 8 will have a large image").setContentIntent(contentIntent)
+            //At most three action buttons can be added (Optional)
+            .addAction(android.R.drawable.ic_menu_edit, "Edit", contentIntent)   //should be a different intent here.
+            .addAction(android.R.drawable.ic_menu_share, "Share", contentIntent) //should be a different intent here.
+            .setChannelId(id1).setAutoCancel(true);
 
         //Set up the notification
         Notification noti = new NotificationCompat.BigPictureStyle(build).bigPicture(BitmapFactory.decodeResource(getResources(), R.drawable.jelly_bean)).build();
@@ -427,68 +435,16 @@ public class MainActivity extends AppCompatActivity {
         PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
         //Makes the Notification Builder
-        NotificationCompat.Builder build = new NotificationCompat.Builder(getApplicationContext(), id1).setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher)).setSmallIcon(R.drawable.ic_announcement_black_24dp).setTicker("This is a notification marquee").setWhen(System.currentTimeMillis()).setContentTitle("Message Title 9").setContentText("You have many emails").setContentIntent(contentIntent).setChannelId(id1).setAutoCancel(true);
+        NotificationCompat.Builder build = new NotificationCompat.Builder(getApplicationContext(), id1)
+            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+            .setSmallIcon(R.drawable.ic_announcement_black_24dp)
+            .setWhen(System.currentTimeMillis())
+            .setContentTitle("Message Title 9")
+            .setContentText("You have many emails")
+            .setContentIntent(contentIntent).setChannelId(id1).setAutoCancel(true);
 
         //Set up the notification
         Notification noti = new NotificationCompat.InboxStyle(build).addLine("Cupcake: Hi, how are you?").addLine("Dount: LOL XD").addLine("Eclair: Here is a funny joke: http://...").addLine("Froyo: You have a new message.").addLine("Gingerbread: I really love eating gingerbread.").addLine("Honeycomb: Why Google only make me for tablets?").addLine("ICS: I am nice.").addLine("Jelly Bean: Yummy").setSummaryText("+999 more emails").build();
-
-        //Show the notification
-        nm.notify(NotID, noti);
-        NotID++;
-
-    }
-
-    /**
-     * This creates a "notification" to happen later.  Actually sets the alarm alarm to wake up
-     * this code in 2 minutes and set a notification then.
-     */
-    public void notlater() {
-
-        //---use the AlarmManager to trigger an alarm---
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-        //---get current date and time---
-        Calendar calendar = Calendar.getInstance();
-
-        //---sets the time for the alarm to trigger in 2 minutes from now---
-        calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE) + 2);
-        calendar.set(Calendar.SECOND, 0);
-
-        //---PendingIntent to launch activity when the alarm triggers-
-
-        //Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
-        Intent notificationIntent = new Intent("edu.cs4730.notificationdemo.DisplayNotification");
-        notificationIntent.putExtra("NotifID", NotID);
-
-        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
-        Log.i("MainACtivity", "Set alarm, I hope");
-
-
-        //---sets the alarm to trigger---
-        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), contentIntent);
-        NotID++;
-    }
-
-    /**
-     * Create a popup notification.
-     */
-    public void and5_notificaiton() {
-        Intent notificationIntent = new Intent(getApplicationContext(), receiveActivity.class);
-        notificationIntent.putExtra("mytype", "iconmsg" + NotID);
-        PendingIntent contentIntent = PendingIntent.getActivity(MainActivity.this, NotID, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
-        Notification noti = new NotificationCompat.Builder(getApplicationContext(), id3)
-                //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
-                .setSmallIcon(R.drawable.ic_launcher).setWhen(System.currentTimeMillis())  //When the event occurred, now, since noti are stored by time.
-                .setContentTitle("Lollipop notificaiton")   //Title message top row.
-                .setContentText("This should be an annoying heads up message.")  //message when looking at the notification, second row
-                //the following 2 lines cause it to show up as popup message at the top in android 5 systems.
-                .setPriority(NotificationManager.IMPORTANCE_HIGH)  //could also be PRIORITY_HIGH.  needed for LOLLIPOP, M and N.  But not Oreo
-                .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000})  //for the heads/pop up must have sound or vibrate
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)  //VISIBILITY_PRIVATE or VISIBILITY_SECRET
-                .setContentIntent(contentIntent)  //what activity to open.
-                .setAutoCancel(true)   //allow auto cancel when pressed.
-                .setChannelId(id3)  //Oreo notifications
-                .build();  //finally build and return a Notification.
 
         //Show the notification
         nm.notify(NotID, noti);
@@ -497,7 +453,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void logthis(String msg) {
-
         Log.d(TAG, msg);
     }
 

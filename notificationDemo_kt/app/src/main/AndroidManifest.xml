@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -13,8 +13,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        tools:targetApi="31">
+        android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -39,20 +38,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".DisplayNotification"
-            android:exported="false"
-            android:label="Notification Demo"
-            android:parentActivityName=".MainActivity"
-            android:uiOptions="splitActionBarWhenNarrow">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-            <intent-filter>
-                <action android:name="edu.cs4730.notificationdemo.DisplayNotification" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".BroadCastRDemo"
             android:label="Broadcast Demo"
             android:parentActivityName=".MainActivity"
@@ -62,14 +47,13 @@
                 android:value=".MainActivity" />
         </activity>
 
-
         <receiver
             android:name=".myBroadcastReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_NOTIFICATION">
             <intent-filter>
-                <action android:name="edu.cs4730.notificationdemo.broadNotification" />
+                <action android:name="edu.cs4730.notificationdemo_kt.broadNotification" />
             </intent-filter>
         </receiver>
     </application>

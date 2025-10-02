@@ -33,6 +33,6 @@ class receiveActivity : AppCompatActivity() {
                 info = "nothing 2"
             }
         }
-        binding!!.logger.text = info
+        binding.logger.text = info
     }
 }
