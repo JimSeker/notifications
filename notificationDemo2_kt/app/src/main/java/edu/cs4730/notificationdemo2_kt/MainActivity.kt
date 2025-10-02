@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         }
         binding.button1.setOnClickListener { //We are going to call the broadcast receiver from notificationDemo1
             val intent = Intent()
-            intent.setAction("edu.cs4730.notificationdemo.broadNotification")
+            intent.setAction("edu.cs4730.notificationdemo_kt.broadNotification")
             intent.setPackage("edu.cs4730.notificationdemo_kt") //in API 26, it must be explicit now.
             //adding some extra inform again.
             intent.putExtra("mytype", "From notificationDemo2_kt")
@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
         binding.button2.setOnClickListener { //We are going to call the broadcast receiver from notificationDemo1
             //same problem, this may fail if notificationDemo1 is targeted at API26.  I'm working to find a fix.
             val intent = Intent()
-            intent.setAction("edu.cs4730.notificationdemo.broadNotification")
+            intent.setAction("edu.cs4730.notificationdemo_kt.broadNotification")
             intent.setPackage("edu.cs4730.notificationdemo_kt") //in API 26, it must be explicit now.
             //adding some extra inform again.
             intent.putExtra("mytype", "alarm from notificationDemo2")
