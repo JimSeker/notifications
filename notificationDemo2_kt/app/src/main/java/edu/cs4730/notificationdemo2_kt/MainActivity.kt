@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() {
             intent.setAction("edu.cs4730.notificationdemo_kt.broadNotification")
             intent.setPackage("edu.cs4730.notificationdemo_kt") //in API 26, it must be explicit now.
             //adding some extra inform again.
-            intent.putExtra("mytype", "alarm from notificationDemo2")
+            intent.putExtra("mytype", "alarm from notificationDemo2_kt")
 
             //---use the AlarmManager to trigger an alarm---
             val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
@@ -161,7 +161,6 @@ class MainActivity : AppCompatActivity() {
 
         //Normally some long running tasking would do this, but we cheat for the example.
         Thread {
-            var incr: Int
             //create the basic notification
             val mBuilder: NotificationCompat.Builder = NotificationCompat.Builder(
                 applicationContext, Actions.id
@@ -171,7 +170,7 @@ class MainActivity : AppCompatActivity() {
                 .setContentText("making progress I hope") //message when looking at the notification, second row
 
             // Do the "lengthy" operation 20 times
-            incr = 0
+            var incr: Int = 0
             while (incr <= 100) {
 
                 // Sets the progress indicator to a max value, the
@@ -208,7 +207,6 @@ class MainActivity : AppCompatActivity() {
     private fun activitybarnoti() {
         //Normally some long running tasking would do this, but we cheat for the example.
         Thread {
-            var incr: Int
             //create the basic notification
             val mBuilder: NotificationCompat.Builder = NotificationCompat.Builder(
                 applicationContext, Actions.id
@@ -217,7 +215,7 @@ class MainActivity : AppCompatActivity() {
                 .setContentText("animated indicator bar") //message when looking at the notification, second row
 
             // Do the "lengthy" operation 20 times
-            incr = 0
+            var incr: Int = 0
             while (incr <= 100) {
 
                 // Sets an activity indicator for an operation of indeterminate length

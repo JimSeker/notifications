@@ -14,6 +14,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -120,6 +121,10 @@ class MainActivity : AppCompatActivity() {
             //Remember use notify with the same ID number, it will just update notification
             //assuming the user hasn't removed it already.
         }
+
+        //set an alarm for 2 minutes from now, which will trigger a broadcast receiver in this app.
+        binding.btnAlarm.setOnClickListener { setAlarm() }
+
         createchannel()
         //for the new api 33+ notifications permissions.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -477,6 +482,56 @@ class MainActivity : AppCompatActivity() {
         nm.notify(NotID, noti)
         NotID++
     }
+
+    /**
+     * Set an alarm to go off in 2 minutes, which will send a broadcast to the broadcast receiver.
+     * Note, you can only set one alarm at a time with this code.  Setting another one before the
+     * first one goes off, will cancel the first one.
+     *
+     *
+     * It uses the alarm manager to trigger the alarm in 2 minutes that sends a broadcast to the
+     * myBroadcastReceiver class in this app.
+     *
+     * A note in when the app is in the background it does work (android 16, api 36), but it maybe
+     * late (3 to 4 minutes in my testing).  This is likely a broadcast intent/receiver priority
+     * (which I didn't set) issue.  I think the default is low priority, so it may take a while to
+     * get to sent.
+     */
+    fun setAlarm() {
+        val intent = Intent()
+        intent.setAction("edu.cs4730.notificationdemo_kt.broadNotification")
+        intent.setPackage("edu.cs4730.notificationdemo_kt") //in API 26, it must be explicit now.
+        //adding some extra inform again.
+        intent.putExtra("mytype", "This is a 2 minute alarm $NotID")
+
+        //---use the AlarmManager to trigger an alarm---
+        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+
+        //---get current date and time---
+        val calendar = Calendar.getInstance()
+
+        //---sets the time for the alarm to trigger in 2 minutes from now---
+        calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE) + 2)
+        calendar.set(Calendar.SECOND, 0)
+
+
+        val contentIntent = PendingIntent.getBroadcast(
+            this@MainActivity,
+            NotID,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        Log.i("MainActivity", "Set alarm, I hope")
+        Toast.makeText(
+            applicationContext,
+            "Alarm for " + calendar.get(Calendar.MINUTE),
+            Toast.LENGTH_SHORT
+        ).show()
+
+        //---sets the alarm to trigger---
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), contentIntent)
+    }
+
 
     private fun logthis(msg: String) {
         Log.d(Actions.TAG, msg)
