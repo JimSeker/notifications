@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     int NotID = 1;
     final String TAG = "MainActivity";
     ActivityResultLauncher<String[]> rpl;
-    private final String[] REQUIRED_PERMISSIONS = new String[]{Manifest.permission.POST_NOTIFICATIONS};
+    private final String[] REQUIRED_PERMISSIONS = new String[]{Manifest.permission.POST_NOTIFICATIONS, "edu.cs4730.BIND_NOTIFICATION"};
 
 
     @Override
