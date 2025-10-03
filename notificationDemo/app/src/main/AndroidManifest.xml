@@ -4,6 +4,9 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <permission
+        android:name="edu.cs4730.BIND_NOTIFICATION"
+        android:protectionLevel="signature" />
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -46,7 +49,7 @@
             android:name=".myBroadcastReceiver"
             android:enabled="true"
             android:exported="true"
-            android:permission="android.permission.BIND_NOTIFICATION">
+            android:permission="edu.cs4730.BIND_NOTIFICATION">
             <intent-filter>
                 <action android:name="edu.cs4730.notificationdemo.broadNotification" />
             </intent-filter>

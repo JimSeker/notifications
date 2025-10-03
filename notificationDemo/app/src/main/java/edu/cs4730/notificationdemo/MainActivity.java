@@ -1,8 +1,10 @@
 package edu.cs4730.notificationdemo;
 
+import java.util.Calendar;
 import java.util.Map;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -19,6 +21,7 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -151,12 +154,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //cancels and removed last notification programming, user doesn't remove it.
-                if (NotID > 1) {
+                if (NotID >= 1) {
                     nm.cancel(NotID);
                     NotID--;
                 }
                 //Remember use notify with the same ID number, it will just update notification
                 //assuming the user hasn't removed it already.
+            }
+        });
+
+        //set an alarm for 2 minutes from now, which will trigger a broadcast receiver in this app.
+        binding.btnAlarm.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setAlarm();
             }
         });
 
@@ -449,6 +460,47 @@ public class MainActivity extends AppCompatActivity {
         //Show the notification
         nm.notify(NotID, noti);
         NotID++;
+    }
+
+
+    /**
+     * Set an alarm to go off in 2 minutes, which will send a broadcast to the broadcast receiver.
+     * Note, you can only set one alarm at a time with this code.  Setting another one before the
+     * first one goes off, will cancel the first one.
+     * <p>
+     * It uses the alarm manager to trigger the alarm in 2 minutes that sends a broadcast to the
+     * myBroadcastReceiver class in this app.
+     *
+     * A note in when the app is in the background it does work (android 16, api 36), but it maybe
+     * late (3 to 4 minutes in my testing).  This is likely a broadcast intent/receiver priority
+     * (which I didn't set) issue.  I think the default is low priority, so it may take a while to
+     * get to sent.
+     */
+    public void setAlarm() {
+
+        Intent intent = new Intent();
+        intent.setAction("edu.cs4730.notificationdemo.broadNotification");
+        intent.setPackage("edu.cs4730.notificationdemo"); //in API 26, it must be explicit now.
+        //adding some extra inform again.
+        intent.putExtra("mytype", "This is a 2 minute alarm " + NotID);
+
+        //---use the AlarmManager to trigger an alarm---
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+        //---get current date and time---
+        Calendar calendar = Calendar.getInstance();
+
+        //---sets the time for the alarm to trigger in 2 minutes from now---
+        calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE) + 2);
+        calendar.set(Calendar.SECOND, 0);
+
+
+        PendingIntent contentIntent = PendingIntent.getBroadcast(MainActivity.this, NotID, intent, PendingIntent.FLAG_IMMUTABLE);
+        Log.i("MainActivity", "Set alarm, I hope");
+        Toast.makeText(getApplicationContext(), "Alarm for " + calendar.get(Calendar.MINUTE), Toast.LENGTH_SHORT).show();
+
+        //---sets the alarm to trigger---
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), contentIntent);
     }
 
 
