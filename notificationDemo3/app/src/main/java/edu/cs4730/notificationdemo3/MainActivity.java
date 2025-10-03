@@ -43,6 +43,10 @@ import edu.cs4730.notificationdemo3.databinding.ActivityMainBinding;
  * <p>
  * As note, with Android 8.x Oreo, they have changed how receivers work in the background.  This example
  * may fail to set "replied" if the app is in the background.
+ *
+ * This example breaks at API 34+ because of the new restrictions on PendingIntents.
+ * I have not found a workaround yet.  the target is set to 33 for now.  hopefully google will put
+ * out a new example or fix.
  */
 
 
@@ -168,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    @SuppressLint({"LaunchActivityFromNotification", "UnspecifiedImmutableFlag"})
+    @SuppressLint({"LaunchActivityFromNotification", "UnspecifiedImmutableFlag", "MissingPermission"})
     void createNotification() {
         // A pending Intent for reads
         PendingIntent readPendingIntent;
@@ -176,7 +180,8 @@ public class MainActivity extends AppCompatActivity {
             readPendingIntent = PendingIntent.getBroadcast(this,
                     NotificationNum,
                     getMessageReadIntent(NotificationNum),
-                    PendingIntent.FLAG_MUTABLE);
+                    //PendingIntent.FLAG_MUTABLE);
+            PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT | PendingIntent.FLAG_MUTABLE);
         } else {
             readPendingIntent = PendingIntent.getBroadcast(this,
                     NotificationNum,
@@ -195,11 +200,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Building a Pending Intent for the reply action to trigger
         PendingIntent replyIntent;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             replyIntent = PendingIntent.getBroadcast(this,
                     NotificationNum,
                     getMessageReplyIntent(NotificationNum),
-                    PendingIntent.FLAG_MUTABLE);
+                   // PendingIntent.FLAG_MUTABLE);
+                PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT  | PendingIntent.FLAG_MUTABLE);
         } else {
             replyIntent = PendingIntent.getBroadcast(this,
                     NotificationNum,
