@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "edu.cs4730.notiodemo_kt"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "edu.cs4730.notiodemo_kt"
-        minSdk = 29
-        targetSdk = 35
+        minSdk = 31
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 

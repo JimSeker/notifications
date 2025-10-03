@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.getRoot())
         ViewCompat.setOnApplyWindowInsetsListener(
-            findViewById(binding.main.id)
+            binding.main
         ) { v: View, insets: WindowInsetsCompat ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -101,7 +101,7 @@ class MainActivity : AppCompatActivity() {
         mNotificationManager.createNotificationChannel(mChannel)
     }
 
-    fun makenoti(message: String?, msgcount: Int) {
+    fun makenoti(message: String, msgcount: Int) {
 
         //Notification noti = new NotificationCompat.Builder(getApplicationContext())
         val noti = Notification.Builder(applicationContext, Actions.id)
