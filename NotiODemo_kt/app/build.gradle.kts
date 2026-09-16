@@ -1,16 +1,15 @@
 plugins {
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.jetbrainsKotlinAndroid)
 }
 
 android {
     namespace = "edu.cs4730.notiodemo_kt"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "edu.cs4730.notiodemo_kt"
-        minSdk = 31
-        targetSdk = 36
+        minSdk = 32
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -27,11 +26,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         viewBinding = true

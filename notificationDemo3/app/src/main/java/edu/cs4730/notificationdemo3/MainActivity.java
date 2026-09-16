@@ -39,7 +39,7 @@ import edu.cs4730.notificationdemo3.databinding.ActivityMainBinding;
  * while most of the work of creating the notifications is in the fragment, we need to create
  * three receivers that are here for the read, delete, reply intents.
  * <p>
- * the reply receiver also updates the notification that we have dealt with he replay message as well.
+ * the reply receiver also updates the notification that we have dealt with the replay message as well.
  * <p>
  * As note, with Android 8.x Oreo, they have changed how receivers work in the background.  This example
  * may fail to set "replied" if the app is in the background.
