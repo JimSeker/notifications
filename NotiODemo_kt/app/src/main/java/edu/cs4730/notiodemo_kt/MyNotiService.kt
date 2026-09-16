@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.IBinder
@@ -14,6 +15,7 @@ import android.os.Process
 import android.os.RemoteException
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import java.util.Random
 
 /**
@@ -35,6 +37,7 @@ class MyNotiService : Service() {
 
     // Handler that receives messages from the thread
     private inner class ServiceHandler(looper: Looper?) : Handler(looper!!) {
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         override fun handleMessage(msg: Message) {
             // Normally we would do some work here, like download a file.
             // For our sample, we just sleep for 5 seconds.
@@ -46,7 +49,13 @@ class MyNotiService : Service() {
             val extras = msg.getData()
             if (extras != null) {
                 times = extras.getInt("times", 0)
-                messenger = extras["MESSENGER"] as Messenger?
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    messenger = extras.getParcelable("messenger", Messenger::class.java)
+                } else {
+                    // Legacy way for Android 12 and below
+                    messenger = extras.get("messenger") as Messenger?
+                }
+
             }
 
             while (i < times) {

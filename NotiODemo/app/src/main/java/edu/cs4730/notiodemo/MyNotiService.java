@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -60,7 +61,13 @@ public class MyNotiService extends Service {
 
             if (extras != null) {
                 times = extras.getInt("times", 0);
-                messenger = (Messenger) extras.get("MESSENGER");
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    // Modern type-safe way for Android 13+
+                    messenger = extras.getParcelable("messenger", Messenger.class);
+                } else {
+                    // Legacy way for Android 12 and below
+                    messenger = (Messenger) extras.getParcelable("messenger");
+                }
             }
             for (i = 0; i < times; i++) {
                 synchronized (this) {
