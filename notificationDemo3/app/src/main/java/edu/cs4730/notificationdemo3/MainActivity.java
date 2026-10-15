@@ -2,6 +2,7 @@ package edu.cs4730.notificationdemo3;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ActivityOptions;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -23,6 +24,7 @@ import java.util.Map;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.app.Person;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -43,10 +45,10 @@ import edu.cs4730.notificationdemo3.databinding.ActivityMainBinding;
  * <p>
  * As note, with Android 8.x Oreo, they have changed how receivers work in the background.  This example
  * may fail to set "replied" if the app is in the background.
- *
- * This example breaks at API 34+ because of the new restrictions on PendingIntents.
- * I have not found a workaround yet.  the target is set to 33 for now.  hopefully google will put
- * out a new example or fix.
+ * <p>
+ * This example works again with the unsafe use of intents.  The way we are supposed to do it fails
+ * after 33+.   I've commented out code to do it correctly, but it doesn't work.
+ * So, for now, this example works with the unsafe code.
  */
 
 
@@ -61,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String CONVERSATION_ID = "conversation_id";
     public static final String EXTRA_REMOTE_REPLY = "extra_remote_reply";
 
-    public PendingIntent mDeletePendingIntent;
+    // public PendingIntent mDeletePendingIntent;
     private static final int REQUEST_CODE = 2323;
 
     ActivityMainBinding binding;
@@ -84,18 +86,18 @@ public class MainActivity extends AppCompatActivity {
         // for notifications permission now required in api 33
         //this allows us to check with multiple permissions, but in this case (currently) only need 1.
         rpl = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(),
-                new ActivityResultCallback<Map<String, Boolean>>() {
-                    @Override
-                    public void onActivityResult(Map<String, Boolean> isGranted) {
-                        boolean granted = true;
-                        for (Map.Entry<String, Boolean> x : isGranted.entrySet()) {
-                            logthis(x.getKey() + " is " + x.getValue());
-                            if (!x.getValue()) granted = false;
-                        }
-                        if (granted)
-                            logthis("Permissions granted for api 33+");
+            new ActivityResultCallback<Map<String, Boolean>>() {
+                @Override
+                public void onActivityResult(Map<String, Boolean> isGranted) {
+                    boolean granted = true;
+                    for (Map.Entry<String, Boolean> x : isGranted.entrySet()) {
+                        logthis(x.getKey() + " is " + x.getValue());
+                        if (!x.getValue()) granted = false;
                     }
+                    if (granted)
+                        logthis("Permissions granted for api 33+");
                 }
+            }
         );
 
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -103,8 +105,8 @@ public class MainActivity extends AppCompatActivity {
         mNotificationManagerCompat = NotificationManagerCompat.from(this);
 
         // Create a PendingIntent to be fired upon deletion of a Notification.
-        Intent deleteIntent = new Intent(MainActivity.ACTION_NOTIFICATION_DELETE);
-        mDeletePendingIntent = PendingIntent.getBroadcast(this, REQUEST_CODE, deleteIntent, PendingIntent.FLAG_IMMUTABLE);
+//        Intent deleteIntent = new Intent(MainActivity.ACTION_NOTIFICATION_DELETE);
+//        mDeletePendingIntent = PendingIntent.getBroadcast(this, REQUEST_CODE, deleteIntent,  PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT | PendingIntent.FLAG_MUTABLE);
 
         // Supply actions to the button that is displayed on screen.
         binding.addbutton.setOnClickListener(new View.OnClickListener() {
@@ -127,7 +129,8 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver mDeleteReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateNumberOfNotifications();
+            int conversationId = intent.getIntExtra(CONVERSATION_ID, -1);
+            updateNumberOfNotifications(conversationId);
         }
     };
 
@@ -147,28 +150,46 @@ public class MainActivity extends AppCompatActivity {
      * Requests the current number of notifications from the {@link NotificationManager} and
      * display them to the user.
      */
-    protected void updateNumberOfNotifications() {
+    protected void updateNumberOfNotifications(int conversationId) {
         //get getting length, but getActiveNotifications() return an array of the notifications, which you can find out the info about the notifications.
         int numberOfNotifications = mNotificationManager.getActiveNotifications().length;
 
         binding.numNoti.setText("Number of Active notifications is: " + numberOfNotifications);
         Log.i(TAG, "Number of Active notifications is: " + numberOfNotifications);
+        if (conversationId != -1)
+            logthis("Notification " + conversationId + " has been dimissed\n");
     }
 
     // Creates an intent that will be triggered when a message is marked as read.
     private Intent getMessageReadIntent(int id) {
         return new Intent()
-                .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-                .setAction(MainActivity.READ_ACTION)
-                .putExtra(MainActivity.CONVERSATION_ID, id);
+            //.setClass(this, MyBroadcastReceiver.class)
+            //.setClass(this, mReplyReceiver.getClass())
+            .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+            .setAction(MainActivity.READ_ACTION)
+            .putExtra(MainActivity.CONVERSATION_ID, id);
+    }
+
+    private PendingIntent getDeleteIntent(int id) {
+        //Intent i =  new Intent(this, mDeleteReceiver.getClass())
+        Intent i = new Intent()
+            .setAction(MainActivity.ACTION_NOTIFICATION_DELETE)
+            .putExtra(MainActivity.CONVERSATION_ID, id);
+
+        return PendingIntent.getBroadcast(this,
+            NotificationNum,
+            i,
+            PendingIntent.FLAG_IMMUTABLE);  //delete doesn't need mutable intents.
     }
 
     // Creates an Intent that will be triggered when a voice reply is received.
     private Intent getMessageReplyIntent(int conversationId) {
         return new Intent()
-                .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-                .setAction(MainActivity.REPLY_ACTION)
-                .putExtra(MainActivity.CONVERSATION_ID, conversationId);
+            // .setClass(this, mReadReceiver.getClass())
+            //.setClass(this, MyBroadcastReceiver.class)
+            .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+            .setAction(MainActivity.REPLY_ACTION)
+            .putExtra(MainActivity.CONVERSATION_ID, conversationId);
     }
 
 
@@ -176,66 +197,69 @@ public class MainActivity extends AppCompatActivity {
     void createNotification() {
         // A pending Intent for reads
         PendingIntent readPendingIntent;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             readPendingIntent = PendingIntent.getBroadcast(this,
-                    NotificationNum,
-                    getMessageReadIntent(NotificationNum),
-                    //PendingIntent.FLAG_MUTABLE);
-            PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT | PendingIntent.FLAG_MUTABLE);
-        } else {
-            readPendingIntent = PendingIntent.getBroadcast(this,
-                    NotificationNum,
-                    getMessageReadIntent(NotificationNum),
-                    PendingIntent.FLAG_UPDATE_CURRENT);
-        }
+                NotificationNum,
+                getMessageReadIntent(NotificationNum),
+                //PendingIntent.FLAG_MUTABLE);
+                PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT | PendingIntent.FLAG_MUTABLE);
+            //PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+//        } else {
+//            readPendingIntent = PendingIntent.getBroadcast(this,
+//                NotificationNum,
+//                getMessageReadIntent(NotificationNum),
+//                PendingIntent.FLAG_UPDATE_CURRENT);
+//        }
 
         // A choices list.
         String[] choices = new String[]{"No", "Yes", "Maybe", "Go away!"};
         // Build a RemoteInput for receiving voice input in a Car Notification or text input on
         // devices that support text input (like devices on Android N and above).
         RemoteInput remoteInput = new RemoteInput.Builder(MainActivity.EXTRA_REMOTE_REPLY)
-                .setLabel("Reply")
-                .setChoices(choices)
-                .build();
+            .setLabel("Reply")
+            .setChoices(choices)
+            .build();
 
         // Building a Pending Intent for the reply action to trigger
         PendingIntent replyIntent;
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             replyIntent = PendingIntent.getBroadcast(this,
-                    NotificationNum,
-                    getMessageReplyIntent(NotificationNum),
-                   // PendingIntent.FLAG_MUTABLE);
-                PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT  | PendingIntent.FLAG_MUTABLE);
+                NotificationNum,
+                getMessageReplyIntent(NotificationNum),
+                // PendingIntent.FLAG_MUTABLE);
+                PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT | PendingIntent.FLAG_MUTABLE);
+            //PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
         } else {
             replyIntent = PendingIntent.getBroadcast(this,
-                    NotificationNum,
-                    getMessageReplyIntent(NotificationNum),
-                    PendingIntent.FLAG_UPDATE_CURRENT);
+                NotificationNum,
+                getMessageReplyIntent(NotificationNum),
+                PendingIntent.FLAG_UPDATE_CURRENT);
         }
+
 
         // Build an Android N compatible Remote Input enabled action.
         NotificationCompat.Action actionReplyByRemoteInput = new NotificationCompat.Action.Builder(
-                R.mipmap.notification_icon, "Reply", replyIntent)
-                .addRemoteInput(remoteInput)
-                .build();
+            R.mipmap.notification_icon, "Reply", replyIntent)
+            .addRemoteInput(remoteInput)
+            .build();
 
         //Create a Person object, to use int he messagingStyle object below.
         Person sender = new Person.Builder()
-                .setName("Jim")
-                .build();
+            .setName("Jim")
+            .build();
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MainActivity.id)
-                .setSmallIcon(R.mipmap.notification_icon)
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.android_contact))
-                .setWhen(System.currentTimeMillis())
-                .setContentTitle("Jim ")
-                .setContentIntent(readPendingIntent)
-                .setDeleteIntent(mDeletePendingIntent)
-                .setChannelId(MainActivity.id)
-                .setStyle(new NotificationCompat.MessagingStyle(sender)
-                        .addMessage("Are you working?", System.currentTimeMillis(), sender)
-                )
-                .addAction(actionReplyByRemoteInput);
+            .setSmallIcon(R.mipmap.notification_icon)
+            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.android_contact))
+            .setWhen(System.currentTimeMillis())
+            .setContentTitle("Jim ")
+            .setContentIntent(readPendingIntent)
+            .setDeleteIntent(getDeleteIntent(NotificationNum))
+            .setChannelId(MainActivity.id)
+            .setStyle(new NotificationCompat.MessagingStyle(sender)
+                .addMessage("Are you working?", System.currentTimeMillis(), sender)
+            )
+            .addAction(actionReplyByRemoteInput);
 
         logthis("Sending notification " + NotificationNum + "\n");
 
@@ -244,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
         mNotificationManagerCompat.notify(NotificationNum, builder.build());
         NotificationNum++;
         //update the number of notifications.
-        updateNumberOfNotifications();
+        updateNumberOfNotifications(-1);
     }
 
 
@@ -265,59 +289,61 @@ public class MainActivity extends AppCompatActivity {
 
 
     //for when a message has been replied to.
-    private BroadcastReceiver mReplyReceiver = new BroadcastReceiver() {
-        @SuppressLint("MissingPermission")
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "onReceiveReply");
-            int conversationId = intent.getIntExtra(CONVERSATION_ID, -1);
-            if (conversationId != -1) {
-                Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
-                if (remoteInput != null) {
-                    String replyMessage = remoteInput.getCharSequence(EXTRA_REMOTE_REPLY).toString();
-                    Log.d(TAG, "Notification " + conversationId + " reply is " + replyMessage);
-                    // Update the notification to stop the progress spinner.
-                    NotificationManagerCompat notificationManager =
-                        NotificationManagerCompat.from(context);
-                    Notification repliedNotification = new NotificationCompat.Builder(context, id)
-                        .setSmallIcon(R.mipmap.notification_icon)
-                        .setLargeIcon(BitmapFactory.decodeResource(
-                            context.getResources(), R.mipmap.android_contact))
-                        .setDeleteIntent(mDeletePendingIntent)  //so we know if they deleted it.
-                        .setContentText("Replied")
-                        .setChannelId(MainActivity.id)
-                        .setOnlyAlertOnce(true)  //don't sound/vibrate/lights again!
-                        .build();
-                    //I do check in onCreate.  yes, it could be removed between then, but don't care.
-                    notificationManager.notify(conversationId, repliedNotification);
-                    NotificationReply(conversationId, replyMessage);
-                }
+    private final BroadcastReceiver mReplyReceiver =  // new MyBroadcastReceiver();
+        new BroadcastReceiver() {
+            @SuppressLint("MissingPermission")
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d(TAG, "onReceiveReply");
+                int conversationId = intent.getIntExtra(CONVERSATION_ID, -1);
+                if (conversationId != -1) {
+                    Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+                    if (remoteInput != null) {
+                        String replyMessage = remoteInput.getCharSequence(EXTRA_REMOTE_REPLY).toString();
+                        Log.d(TAG, "Notification " + conversationId + " reply is " + replyMessage);
+                        // Update the notification to stop the progress spinner.
+                        NotificationManagerCompat notificationManager =
+                            NotificationManagerCompat.from(context);
+                        Notification repliedNotification = new NotificationCompat.Builder(context, id)
+                            .setSmallIcon(R.mipmap.notification_icon)
+                            .setLargeIcon(BitmapFactory.decodeResource(
+                                context.getResources(), R.mipmap.android_contact))
+                            .setDeleteIntent(getDeleteIntent(conversationId))  //so we know if they deleted it.
+                            .setContentText("Replied")
+                            .setChannelId(MainActivity.id)
+                            .setOnlyAlertOnce(true)  //don't sound/vibrate/lights again!
+                            .build();
+                        //I do check in onCreate.  yes, it could be removed between then, but don't care.
+                        notificationManager.notify(conversationId, repliedNotification);
+                        NotificationReply(conversationId, replyMessage);
+                    }
 
+                }
             }
-        }
-    };
+        };
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     @Override
     protected void onStart() {
         super.onStart();
-          if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-              registerReceiver(mDeleteReceiver, new IntentFilter(ACTION_NOTIFICATION_DELETE), Context.RECEIVER_NOT_EXPORTED);
-              registerReceiver(mReadReceiver, new IntentFilter(READ_ACTION), Context.RECEIVER_NOT_EXPORTED);
-              registerReceiver(mReplyReceiver, new IntentFilter(REPLY_ACTION), Context.RECEIVER_NOT_EXPORTED);
-          } else {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            //these should not be exported in the docs, but doesn't work with exported false.
+            registerReceiver(mDeleteReceiver, new IntentFilter(ACTION_NOTIFICATION_DELETE), Context.RECEIVER_EXPORTED);
+            registerReceiver(mReadReceiver, new IntentFilter(READ_ACTION), Context.RECEIVER_EXPORTED);
+            registerReceiver(mReplyReceiver, new IntentFilter(REPLY_ACTION), Context.RECEIVER_EXPORTED);
+        } else {
 
-              //lint can't see the if statement and is stupid.
-              registerReceiver(mDeleteReceiver, new IntentFilter(ACTION_NOTIFICATION_DELETE));
-              registerReceiver(mReadReceiver, new IntentFilter(READ_ACTION));
-              registerReceiver(mReplyReceiver, new IntentFilter(REPLY_ACTION));
-          }
+            //lint can't see the if statement and is stupid.
+            registerReceiver(mDeleteReceiver, new IntentFilter(ACTION_NOTIFICATION_DELETE));
+            registerReceiver(mReadReceiver, new IntentFilter(READ_ACTION));
+            registerReceiver(mReplyReceiver, new IntentFilter(REPLY_ACTION));
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        updateNumberOfNotifications();
+        updateNumberOfNotifications(-1);
     }
 
     @Override
@@ -357,6 +383,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+
     public void logthis(String msg) {
         binding.logger.append(msg);
         Log.d(TAG, msg);
