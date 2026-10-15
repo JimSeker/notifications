@@ -2,7 +2,6 @@ package edu.cs4730.notificationdemo3;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.ActivityOptions;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -24,7 +23,6 @@ import java.util.Map;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.app.Person;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -62,9 +60,6 @@ public class MainActivity extends AppCompatActivity {
     public static final String REPLY_ACTION = "edu.cs4730.notification3.ACTION_MESSAGE_REPLY";
     public static final String CONVERSATION_ID = "conversation_id";
     public static final String EXTRA_REMOTE_REPLY = "extra_remote_reply";
-
-    // public PendingIntent mDeletePendingIntent;
-    private static final int REQUEST_CODE = 2323;
 
     ActivityMainBinding binding;
 
@@ -104,10 +99,6 @@ public class MainActivity extends AppCompatActivity {
         //to send notifications and everything else.
         mNotificationManagerCompat = NotificationManagerCompat.from(this);
 
-        // Create a PendingIntent to be fired upon deletion of a Notification.
-//        Intent deleteIntent = new Intent(MainActivity.ACTION_NOTIFICATION_DELETE);
-//        mDeletePendingIntent = PendingIntent.getBroadcast(this, REQUEST_CODE, deleteIntent,  PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT | PendingIntent.FLAG_MUTABLE);
-
         // Supply actions to the button that is displayed on screen.
         binding.addbutton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,51 +116,55 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //for updates when a notification has been deleted.
-    private BroadcastReceiver mDeleteReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int conversationId = intent.getIntExtra(CONVERSATION_ID, -1);
-            updateNumberOfNotifications(conversationId);
-        }
-    };
 
-    //for when a message has been read
-    private BroadcastReceiver mReadReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "onReceiveRead");
-            int conversationId = intent.getIntExtra(CONVERSATION_ID, -1);
-            if (conversationId != -1) {
-                NotificationRead(conversationId);
-            }
-        }
-    };
 
     /**
      * Requests the current number of notifications from the {@link NotificationManager} and
      * display them to the user.
      */
     protected void updateNumberOfNotifications(int conversationId) {
-        //get getting length, but getActiveNotifications() return an array of the notifications, which you can find out the info about the notifications.
+        //get getting length, but getActiveNotifications() return an array of the notifications,
+        // which you can find out the info about the notifications.
         int numberOfNotifications = mNotificationManager.getActiveNotifications().length;
 
         binding.numNoti.setText("Number of Active notifications is: " + numberOfNotifications);
         Log.i(TAG, "Number of Active notifications is: " + numberOfNotifications);
         if (conversationId != -1)
-            logthis("Notification " + conversationId + " has been dimissed\n");
+            logthis("Notification " + conversationId + " has been dismissed\n");
     }
 
-    // Creates an intent that will be triggered when a message is marked as read.
-    private Intent getMessageReadIntent(int id) {
-        return new Intent()
-            //.setClass(this, MyBroadcastReceiver.class)
-            //.setClass(this, mReplyReceiver.getClass())
-            .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+    /*
+     * creates an intent that will be triggered when a message is marked as read.
+     * A pendingIntent is returned for the notification and receiver.
+     */
+    private PendingIntent getMessageReadIntent(int id) {
+        //first create the intent
+        //Intent intent = new Intent(this, mReadReceiver.getClass())
+        Intent intent = new Intent()
             .setAction(MainActivity.READ_ACTION)
             .putExtra(MainActivity.CONVERSATION_ID, id);
+        //now create the pending intent and return it.
+        PendingIntent readPendingIntent;
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            readPendingIntent = PendingIntent.getBroadcast(this,
+                NotificationNum,
+                intent,
+                PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT | PendingIntent.FLAG_MUTABLE);
+            //PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);  //should be correct one.
+        } else {
+            readPendingIntent = PendingIntent.getBroadcast(this,
+                NotificationNum,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+        return readPendingIntent;
     }
 
+    /*
+     * Creates the delete intent that is used in 2 places.  add the ID number
+     * into the intent.  This one doesn't need to be mutable, so also does do any
+     * interesting in the setup.  The receiver does need exported though.
+     */
     private PendingIntent getDeleteIntent(int id) {
         //Intent i =  new Intent(this, mDeleteReceiver.getClass())
         Intent i = new Intent()
@@ -182,34 +177,41 @@ public class MainActivity extends AppCompatActivity {
             PendingIntent.FLAG_IMMUTABLE);  //delete doesn't need mutable intents.
     }
 
-    // Creates an Intent that will be triggered when a voice reply is received.
-    private Intent getMessageReplyIntent(int conversationId) {
-        return new Intent()
-            // .setClass(this, mReadReceiver.getClass())
-            //.setClass(this, MyBroadcastReceiver.class)
-            .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+    /*
+     * create an intent for a reply (voice or typed)
+     * and returns a pending Intent to trigger the reply receiver.
+     */
+    private PendingIntent getMessageReplyIntent(int conversationId) {
+        //Intent intent=  new Intent(this, mReplyReceiver.getClass())  //correct one, but doesn't work.
+        Intent intent = new Intent()
             .setAction(MainActivity.REPLY_ACTION)
             .putExtra(MainActivity.CONVERSATION_ID, conversationId);
+
+        // Building a Pending Intent for the reply action to trigger the reply receiver.
+        PendingIntent replyIntent;
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            replyIntent = PendingIntent.getBroadcast(this,
+                NotificationNum,
+                intent,
+                PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT | PendingIntent.FLAG_MUTABLE);
+            //PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);  correct one, but doesn't work.
+        } else {
+            replyIntent = PendingIntent.getBroadcast(this,
+                NotificationNum,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+        return replyIntent;
     }
 
 
+    /*
+     * Creates a notification for the example, which allows for a reply message
+     * also returns if the message was read (reply implies read, so it won't be triggered by reply)
+     * and when the message is dismissed.
+     */
     @SuppressLint({"LaunchActivityFromNotification", "UnspecifiedImmutableFlag", "MissingPermission"})
     void createNotification() {
-        // A pending Intent for reads
-        PendingIntent readPendingIntent;
-//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            readPendingIntent = PendingIntent.getBroadcast(this,
-                NotificationNum,
-                getMessageReadIntent(NotificationNum),
-                //PendingIntent.FLAG_MUTABLE);
-                PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT | PendingIntent.FLAG_MUTABLE);
-            //PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-//        } else {
-//            readPendingIntent = PendingIntent.getBroadcast(this,
-//                NotificationNum,
-//                getMessageReadIntent(NotificationNum),
-//                PendingIntent.FLAG_UPDATE_CURRENT);
-//        }
 
         // A choices list.
         String[] choices = new String[]{"No", "Yes", "Maybe", "Go away!"};
@@ -220,26 +222,9 @@ public class MainActivity extends AppCompatActivity {
             .setChoices(choices)
             .build();
 
-        // Building a Pending Intent for the reply action to trigger
-        PendingIntent replyIntent;
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            replyIntent = PendingIntent.getBroadcast(this,
-                NotificationNum,
-                getMessageReplyIntent(NotificationNum),
-                // PendingIntent.FLAG_MUTABLE);
-                PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT | PendingIntent.FLAG_MUTABLE);
-            //PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-        } else {
-            replyIntent = PendingIntent.getBroadcast(this,
-                NotificationNum,
-                getMessageReplyIntent(NotificationNum),
-                PendingIntent.FLAG_UPDATE_CURRENT);
-        }
-
-
         // Build an Android N compatible Remote Input enabled action.
         NotificationCompat.Action actionReplyByRemoteInput = new NotificationCompat.Action.Builder(
-            R.mipmap.notification_icon, "Reply", replyIntent)
+            R.mipmap.notification_icon, "Reply", getMessageReplyIntent(NotificationNum))
             .addRemoteInput(remoteInput)
             .build();
 
@@ -253,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
             .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.android_contact))
             .setWhen(System.currentTimeMillis())
             .setContentTitle("Jim ")
-            .setContentIntent(readPendingIntent)
+            .setContentIntent(getMessageReadIntent(NotificationNum))  //so we know if they read it.
             .setDeleteIntent(getDeleteIntent(NotificationNum))
             .setChannelId(MainActivity.id)
             .setStyle(new NotificationCompat.MessagingStyle(sender)
@@ -271,22 +256,31 @@ public class MainActivity extends AppCompatActivity {
         updateNumberOfNotifications(-1);
     }
 
-
     /*
-     * helper method that the mainactivity can call, to update the logger that a message has been read.
+     * All the receivers below here, one for delete, reply and read.
      */
-    public void NotificationRead(int id) {
-        logthis("Notification " + id + "has been read\n");
-    }
 
+    //for updates when a notification has been deleted.
+    private final BroadcastReceiver mDeleteReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int conversationId = intent.getIntExtra(CONVERSATION_ID, -1);
+            updateNumberOfNotifications(conversationId);
+        }
+    };
 
-    /*
-     * helper method that the mainactivity can use to update the logger with the reply to notification.
-     */
-    public void NotificationReply(int id, String message) {
-        logthis("Notification " + id + ": reply is " + message + "\n");
-    }
-
+    //for when a message has been read
+    private final BroadcastReceiver mReadReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "onReceiveRead");
+            int conversationId = intent.getIntExtra(CONVERSATION_ID, -1);
+            if (conversationId != -1) {
+                //normally something more interesting, but a log works here.
+                logthis("Notification " + conversationId + " has been read\n");
+            }
+        }
+    };
 
     //for when a message has been replied to.
     private final BroadcastReceiver mReplyReceiver =  // new MyBroadcastReceiver();
@@ -315,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
                             .build();
                         //I do check in onCreate.  yes, it could be removed between then, but don't care.
                         notificationManager.notify(conversationId, repliedNotification);
-                        NotificationReply(conversationId, replyMessage);
+                        logthis("Notification " + conversationId + ": reply is " + replyMessage + "\n");
                     }
 
                 }
@@ -327,8 +321,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            //these should not be exported in the docs, but doesn't work with exported false.
             registerReceiver(mDeleteReceiver, new IntentFilter(ACTION_NOTIFICATION_DELETE), Context.RECEIVER_EXPORTED);
+            //these should not be exported in the docs, but doesn't work with exported false.
             registerReceiver(mReadReceiver, new IntentFilter(READ_ACTION), Context.RECEIVER_EXPORTED);
             registerReceiver(mReplyReceiver, new IntentFilter(REPLY_ACTION), Context.RECEIVER_EXPORTED);
         } else {
